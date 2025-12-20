@@ -60,7 +60,7 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: "#/components/schemas/Antwort"a
+                $ref: "#/components/schemas/Antwort"
   /antraege/{uuid}/einrichtung/phasen/{phase}:
     post:
       tags:

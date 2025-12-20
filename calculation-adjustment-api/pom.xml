@@ -5,22 +5,22 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>de.deutscherv.rvsm.fa.fit</groupId>
-        <artifactId>rvfit-api</artifactId>
+        <groupId>de.hdi.underwriting</groupId>
+        <artifactId>uwwb-api</artifactId>
         <version>${revision}</version>
     </parent>
 
-    <artifactId>rvfit-rest-api</artifactId>
+    <artifactId>calculation-adjustment-api</artifactId>
     <packaging>pom</packaging>
 
     <modules>
-        <module>rvfit-rest-api-spec</module>
-        <module>rvfit-rest-api-client</module>
+        <module>ca-rest-api-spec</module>
+        <module>ca-rest-api-client</module>
     </modules>
 
 
     <properties>
-        <specFileLocal>src/main/resources/rvfit-api.yaml</specFileLocal>
+        <specFileLocal>src/main/resources/ca-api.yaml</specFileLocal>
         <specFile>${project.basedir}/../${specFileLocal}</specFile>
     </properties>
 

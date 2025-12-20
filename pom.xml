@@ -4,14 +4,14 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>de.deutscherv.rvsm.fa.fit</groupId>
-    <artifactId>rvfit-api</artifactId>
+    <groupId>de.hdi.underwriting</groupId>
+    <artifactId>uwwb-api</artifactId>
     <version>${revision}</version>
     <packaging>pom</packaging>
 
     <properties>
         <!-- see https://maven.apache.org/maven-ci-friendly.html#single-project-setup -->
-        <revision>2.4.2</revision>
+        <revision>1.0.0</revision>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <flatten-plugin.version>1.7.3</flatten-plugin.version>
@@ -22,15 +22,9 @@
 
     <developers>
         <developer>
-            <name>Team WFA</name>
-            <email>_DRV_rvEvolution_Team_WFA</email>
+            <name>Team UwwB</name>
         </developer>
     </developers>
-
-    <scm>
-        <url>https://git.drv.drv/projects/RVSMVOM/repos/workflow-api/browse</url>
-        <developerConnection>ssh://git@git.drv.drv:7999/rvsmvom/workflow-api.git</developerConnection>
-    </scm>
 
     <dependencies>
         <dependency>
@@ -53,7 +47,7 @@
     </dependencies>
 
     <modules>
-        <module>rvfit-rest-api</module>
+        <module>calculation-adjustment-api</module>
     </modules>
 
     <build>

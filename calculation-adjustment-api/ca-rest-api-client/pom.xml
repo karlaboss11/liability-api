@@ -5,12 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>de.deutscherv.rvsm.fa.fit</groupId>
-        <artifactId>rvfit-rest-api</artifactId>
+        <groupId>de.hdi.underwriting</groupId>
+        <artifactId>calculation-adjustment-api</artifactId>
         <version>${revision}</version>
     </parent>
 
-    <artifactId>rvfit-rest-api-client</artifactId>
+    <artifactId>ca-rest-api-client</artifactId>
     <packaging>pom</packaging>
 
     <build>
@@ -58,9 +58,9 @@
                             <generatorName>typescript-angular</generatorName>
                             <output>target/generated-sources/openapi</output>
                             <configOptions>
-                                <apiModulePrefix>RVSM</apiModulePrefix>
+                                <apiModulePrefix>UWWB</apiModulePrefix>
                                 <ngVersion>20.0.0</ngVersion>
-                                <npmName>@rvsm/rvfit-${project.artifactId}</npmName>
+                                <npmName>@openapi/calculation-adjustment-${project.artifactId}</npmName>
                                 <npmRepository>https://zar.entw.bund.drv/artifactory/api/npm/bund-rvevo-npm/</npmRepository>
                                 <npmVersion>${notSnapshotVersion}</npmVersion>
                                 <snapshot>${isSnapshot}</snapshot>

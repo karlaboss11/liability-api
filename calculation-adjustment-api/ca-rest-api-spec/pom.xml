@@ -5,12 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>de.deutscherv.rvsm.fa.fit</groupId>
-        <artifactId>rvfit-rest-api</artifactId>
+        <groupId>de.hdi.underwriting</groupId>
+        <artifactId>calculation-adjustment-api</artifactId>
         <version>${revision}</version>
     </parent>
 
-    <artifactId>rvfit-rest-api-spec</artifactId>
+    <artifactId>ca-rest-api-spec</artifactId>
     <packaging>jar</packaging>
 
     <build>
@@ -48,30 +48,29 @@
                 <artifactId>openapi-generator-maven-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>java-spec-rvfit</id>
+                        <id>java-spec-ca</id>
                         <goals>
                             <goal>generate</goal>
                         </goals>
                         <configuration>
                             <inputSpec>${specFile}</inputSpec>
-                            <generatorName>jaxrs-spec</generatorName>
+                            <generatorName>spring</generatorName>
                             <output>target/generated-sources/openapi</output>
-                            <modelNameSuffix>Dto</modelNameSuffix>
+                            <modelNameSuffix>Resource</modelNameSuffix>
                             <additionalProperties>
                                 <additionalProperty>removeEnumValuePrefix=false</additionalProperty>
                             </additionalProperties>
                             <configOptions>
                                 <sourceFolder>src/main/java</sourceFolder>
-                                <apiPackage>de.deutscherv.rvsm.fa.fit.openapi.api</apiPackage>
-                                <modelPackage>de.deutscherv.rvsm.fa.fit.openapi.model</modelPackage>
-                                <packageName>de.deutscherv.rvsm.fa.fit.openapi</packageName>
-                                <invokerPackage>de.deutscherv.rvsm.fa.fit.openapi</invokerPackage>
+                                <apiPackage>de.hdi.underwriting.calculationadjustment.controller</apiPackage>
+                                <modelPackage>de.hdi.underwriting.calculationadjustment.controller.model</modelPackage>
+                                <packageName>de.hdi.underwriting.calculationadjustment</packageName>
+                                <invokerPackage>de.hdi.underwriting.calculationadjustment</invokerPackage>
                                 <includeCollapsedSpecInArtifacts>true</includeCollapsedSpecInArtifacts>
-                                <library>quarkus</library>
                                 <enablePostProcessFile>true</enablePostProcessFile>
-                                <artifactId>rvfit-rest-api</artifactId>
+                                <artifactId>ca-rest-api</artifactId>
                                 <artifactVersion>${project.version}</artifactVersion>
-                                <groupId>de.deutscherv.rvsm.fa.fit</groupId>
+                                <groupId>de.hdi.underwriting.calculationadjustment</groupId>
                                 <bigDecimalAsString>true</bigDecimalAsString>
                                 <dateLibrary>java8-localdatetime</dateLibrary>
                                 <generateBuilder>true</generateBuilder>
@@ -146,7 +145,7 @@
 			    </executions>
 			    <configuration>
 			        <packageNames>
-			            <packageName>de.deutscherv.rvsm.fa.fit.openapi.model</packageName>
+			            <packageName>de.hdi.underwriting.calculationadjustment.model</packageName>
 			        </packageNames>
 			        <schemaVersion>DRAFT_2020_12</schemaVersion>
 			        <schemaFilePath>src/main/resources/jsonschemas</schemaFilePath>
