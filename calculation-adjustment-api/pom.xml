@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>de.deutscherv.rvsm.fa.fit</groupId>
+        <artifactId>rvfit-api</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <artifactId>rvfit-rest-api</artifactId>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>rvfit-rest-api-spec</module>
+        <module>rvfit-rest-api-client</module>
+    </modules>
+
+
+    <properties>
+        <specFileLocal>src/main/resources/rvfit-api.yaml</specFileLocal>
+        <specFile>${project.basedir}/../${specFileLocal}</specFile>
+    </properties>
+
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.ethlo.zally</groupId>
+                <artifactId>zally-maven-plugin</artifactId>
+                <configuration>
+                    <skip>false</skip>
+                    <!-- The input file to validate -->
+                    <source>${project.basedir}/${specFileLocal}</source>
+                    <skipRules>
+                        <skipRule>PluralizeResourceNamesRule</skipRule>
+                        <skipRule>SnakeCaseInPropNameRule</skipRule>
+                        <skipRule>CommonFieldTypesRule</skipRule>
+                        <skipRule>SuccessResponseAsJsonObjectRule</skipRule>
+                        <skipRule>UseProblemJsonRule</skipRule>
+                    </skipRules>
+                    <ruleConfigs>
+                        <PluralizeResourceNamesRule>
+                            whitelist:
+                            - papier
+                            - einrichtung
+                            - statistik
+                            - antraege
+                            - eantrag
+                            - pdf
+                            - pruefergebnis
+                            - reha
+                            - ablehnung
+                            - bewilligung
+                            - einrichtungen
+                            - phasen
+                            - druckprodukte
+                            - rehaeinrichtungen
+                            - stammdaten
+                            - antragsdaten
+                            - testsupport
+                            - custom
+                            - self
+                        </PluralizeResourceNamesRule>
+                    </ruleConfigs>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
