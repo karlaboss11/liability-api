@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>de.deutscherv.rvsm.fa.fit</groupId>
+        <artifactId>rvfit-rest-api</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <artifactId>rvfit-rest-api-client</artifactId>
+    <packaging>pom</packaging>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.ethlo.zally</groupId>
+                <artifactId>zally-maven-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>version-helper</id>
+                        <goals>
+                            <goal>bsh-property</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <properties>
+                        <property>isSnapshot</property>
+                        <property>notSnapshotVersion</property>
+                    </properties>
+                    <source>
+                        isSnapshot = project.version.endsWith("-SNAPSHOT");
+                        notSnapshotVersion = isSnapshot ? project.version.substring(0, project.version.indexOf("-")) : project.version;
+                    </source>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>angular-client</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${specFile}</inputSpec>
+                            <generatorName>typescript-angular</generatorName>
+                            <output>target/generated-sources/openapi</output>
+                            <configOptions>
+                                <apiModulePrefix>RVSM</apiModulePrefix>
+                                <ngVersion>20.0.0</ngVersion>
+                                <npmName>@rvsm/rvfit-${project.artifactId}</npmName>
+                                <npmRepository>https://zar.entw.bund.drv/artifactory/api/npm/bund-rvevo-npm/</npmRepository>
+                                <npmVersion>${notSnapshotVersion}</npmVersion>
+                                <snapshot>${isSnapshot}</snapshot>
+                                <withInterfaces>true</withInterfaces>
+                                <fileNaming>kebab-case</fileNaming>
+                                <modelPropertyNaming>camelCase</modelPropertyNaming>
+                                <useSingleRequestParameter>false</useSingleRequestParameter>
+                                <serviceSuffix>ApiService</serviceSuffix>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>src/assembly/npm-package.tgz.xml</descriptor>
+                            </descriptors>
+                            <tarLongFileMode>posix</tarLongFileMode>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
