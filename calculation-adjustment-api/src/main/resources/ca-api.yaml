@@ -1,0 +1,2777 @@
+openapi: 3.1.1
+info:
+  title: RV Fit API
+  version: 2.4.1
+  description: Schnittstelle für den rvEvolution ART1 RVFit.
+  contact:
+    name: ART1 Team Flash + TwoFace
+    url: https://rvwiki.drv.drv/x/BJKSFg
+    email: stefan.schinko@drv-bw.de
+  x-api-id: rvfit..1
+  x-audience: component-internal
+paths:
+  /antraege/{uuid}:
+    get:
+      tags:
+        - Antraege
+      summary: Gibt einen Präventionsantrag und die dazu ausgewählte Rehaeinrichtungen zurück
+      description: Gibt einen Präventionsantrag zur übergebenen UUID zurück
+      operationId: getByUuid
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: uuid
+          in: path
+          description: Die UUID eines Antrages
+          schema:
+            type: string
+            format: uuid
+          required: true
+          example: 49dd5d3c-06d8-4bf3-ad28-0f65a9b7781b
+      responses:
+        "200":
+          description: Der Antrag zur UUID wurde übermittelt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Antrag"
+        "400":
+          description: Der angegebene UUID als Parameter ist ungültig
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "401":
+          description: Es ist kein gültiger Nutzer vorhanden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "403":
+          description: Der angemeldete Nutzer besitzt nicht die erforderlichen Rechte
+        "404":
+          description: Der Antrag konnte anhand der UUID nicht gefunden werden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "500":
+          description: Interner Server Fehler
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"a
+  /antraege/{uuid}/einrichtung/phasen/{phase}:
+    post:
+      tags:
+        - Antraege
+      summary: Setzt die ausgewählte Einrichtungen eines Antrags
+      description: Setzt die ausgewählte Einrichtungen eines Antrags für die jeweilige Phasen zur übergebenen UUID zurück
+      operationId: updateEinrichtungByPhase
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: uuid
+          in: path
+          description: Die UUID eines Antrags
+          schema:
+            type: string
+            format: uuid
+          required: true
+          example: 49dd5d3c-06d8-4bf3-ad28-0f65a9b7781b
+        - name: phase
+          in: path
+          description: Die Phase einer Einrichtung
+          schema:
+            type: string
+            enum:
+              - STARTPHASE
+              - TRAININGSPHASE
+          required: true
+          example: STARTPHASE
+      requestBody:
+        description: Ausgewählte Einrichtung eines Antrags mit der jeweiligen Phase
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RehaEinrichtungUpdate"
+        required: true
+      responses:
+        "200":
+          description: Die Einrichtungen eines Antrages wurden updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "400":
+          description: Die angegebene UUID als Parameter ist ungültig oder es wurden keine 3 Einrichtungen übergeben
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "401":
+          description: Es ist kein gültiger Nutzer vorhanden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "403":
+          description: Der angemeldete Nutzer besitzt nicht die erforderlichen Rechte
+        "404":
+          description: Der Antrag konnte anhand der UUID nicht gefunden werden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "415":
+          description: Der ein unerwarteter Medientyp übergeben
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "500":
+          description: Interner Server Fehler
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+  /antraege/eantrag:
+    post:
+      tags:
+        - Antraege
+      summary: Datenstruktur eAntrag aus XML einlesen und nach XML schreiben
+      description: Setzt die Einrichtungen eines Antrags für die verschiedenen Phasen
+      operationId: setEantrag
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: eAntrag XML
+        required: true
+        content:
+          application/xml:
+            schema:
+              type: string
+      responses:
+        "200":
+          description: Der Antrag wurde erfolgreich gespeichert
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Antrag"
+        "401":
+          description: Es ist kein gültiger Nutzer vorhanden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "415":
+          description: Der ein unerwarteter Medientyp übergeben
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "500":
+          description: Interner Server Fehler
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+  /antraege/{uuid}/pruefergebnis:
+    put:
+      tags:
+        - Antraege
+      summary: Feststellt das Pruefergebnis des Antrags
+      description: Feststellt das Pruefergebnis des Antrags zur übergebenen UUID zurück
+      operationId: updateRegelErgebnis
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: uuid
+          in: path
+          description: Die UUID eines Antrags
+          schema:
+            type: string
+            format: uuid
+          required: true
+          example: 49dd5d3c-06d8-4bf3-ad28-0f65a9b7781b
+      requestBody:
+        description: Pruefergebnis des Antrags
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PruefergebnisUpdate"
+      responses:
+        "200":
+          description: Das Pruefergebnis eines Antrages wurde updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "400":
+          description: Das Pruefergebnis enthaelt Fehler
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "401":
+          description: Es ist kein gültiger Nutzer vorhanden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "403":
+          description: Der angemeldete Nutzer besitzt nicht die erforderlichen Rechte
+        "404":
+          description: Der Antrag konnte anhand der UUID nicht gefunden werden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "415":
+          description: Der ein unerwarteter Medientyp übergeben
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "500":
+          description: Interner Server Fehler
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+  /antraege/{uuid}/pruefergebnis/reset:
+    put:
+      tags:
+        - Antraege
+      summary: Reset das Ergebnis der Regel
+      description: Reset das Ergebnis der Regel zur übergebenen UUID zurück
+      operationId: resetRegelErgebnis
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: uuid
+          in: path
+          description: Die UUID eines Antrags
+          schema:
+            type: string
+            format: uuid
+          required: true
+          example: 49dd5d3c-06d8-4bf3-ad28-0f65a9b7781b
+      requestBody:
+        description: Regel des Pruefergebnis
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegelName"
+      responses:
+        "200":
+          description: Das Ergebnis der Regel eines Antrages wurde updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "400":
+          description: Der Regel des Pruefergebnis enthaelt Fehler
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "401":
+          description: Es ist kein gültiger Nutzer vorhanden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "403":
+          description: Der angemeldete Nutzer besitzt nicht die erforderlichen Rechte
+        "404":
+          description: Der Antrag konnte anhand der UUID nicht gefunden werden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "415":
+          description: Der ein unerwarteter Medientyp übergeben
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "500":
+          description: Interner Server Fehler
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+  /antraege/{uuid}/personendatenabgleich:
+    post:
+      tags:
+        - Antraege
+      summary: Führt die Regelprüfung für den Personendatenabgleich für einen Antrag durch
+      description: Führt die Regelprüfung für den Personendatenabgleich für einen Antrag durch
+      operationId: getPersonendatenabgleich
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: uuid
+          in: path
+          description: Die UUID eines Antrags
+          schema:
+            type: string
+            format: uuid
+          required: true
+          example: 49dd5d3c-06d8-4bf3-ad28-0f65a9b7781b
+      responses:
+        "200":
+          description: Die Regelpruefung wurde erfolgreich ausgeführt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "304":
+          description: Die Stammdaten haben sich seit dem letzten Zugriff nicht verändert
+        "401":
+          description: Es ist kein gültiger Nutzer vorhanden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "403":
+          description: Der angemeldete Nutzer besitzt nicht die erforderlichen Rechte
+        "404":
+          description: Der Antrag konnte anhand der UUID nicht gefunden werden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "500":
+          description: Interner Server Fehler
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+
+  /antraege/{uuid}/verarbeitungsart:
+    get:
+      tags:
+        - Antraege
+      summary: Ermittelt die aktuelle Verarbeitungsart des Antrags
+      description: Ermittelt die aktuelle Verarbeitungsart des Antrags
+      operationId: getVerarbeitungsart
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: uuid
+          in: path
+          description: Die UUID eines Antrags
+          schema:
+            type: string
+            format: uuid
+          required: true
+          example: 49dd5d3c-06d8-4bf3-ad28-0f65a9b7781b
+      responses:
+        "200":
+          description: Verarbeitungsart wurde ermittelt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Verarbeitungsart"
+        "401":
+          description: Es ist kein gültiger Nutzer vorhanden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "403":
+          description: Der angemeldete Nutzer besitzt nicht die erforderlichen Rechte
+        "404":
+          description: Die Verarbeitungsart konnte anhand der UUID nicht gefunden werden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "500":
+          description: Interner Server Fehler
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+  /antraege/{uuid}/bestandsfehler:
+    get:
+      tags:
+        - Antraege
+      summary: Ermittelt den aktuellen Bestandsfehler des Antrags
+      description: Ermittelt den aktuellen Bestandsfehler des Antrags
+      operationId: getBestandsfehler
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: uuid
+          in: path
+          description: Die UUID eines Antrags
+          schema:
+            type: string
+            format: uuid
+          required: true
+          example: 49dd5d3c-06d8-4bf3-ad28-0f65a9b7781b
+      responses:
+        "200":
+          description: Bestandsfehler wurde ermittelt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Bestandsfehler"
+        "401":
+          description: Es ist kein gültiger Nutzer vorhanden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "403":
+          description: Der angemeldete Nutzer besitzt nicht die erforderlichen Rechte
+        "404":
+          description: Der Bestandsfehler konnte anhand der UUID nicht gefunden werden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "500":
+          description: Interner Server Fehler
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+  /antraege/{uuid}/erneuter-versuch:
+    post:
+      tags:
+        - Antraege
+      summary: Stößt die erneute Verarbeitung des aktuellen Antrags im aktuellen Status an
+      description: Stößt die erneute Verarbeitung des aktuellen Antrags im aktuellen Status an
+      operationId: erneuterVersuch
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: uuid
+          in: path
+          description: Die UUID eines Antrags
+          schema:
+            type: string
+            format: uuid
+          required: true
+          example: 49dd5d3c-06d8-4bf3-ad28-0f65a9b7781b
+      responses:
+        "200":
+          description: Antrag wurde verarbeitet und Status wurde aktualisiert
+        "401":
+          description: Es ist kein gültiger Nutzer vorhanden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "403":
+          description: Der angemeldete Nutzer besitzt nicht die erforderlichen Rechte
+        "404":
+          description: Der Antrag konnte anhand der UUID nicht gefunden werden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "500":
+          description: Interner Server Fehler
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+  /aufgaben/{uuid}/antrag:
+    get:
+      tags:
+        - Aufgaben
+      summary: Gibt den Antrag zu einer Aufgabe zurück
+      description: Gibt den Antrag zu der Aufgabe zur angegebenen UUID zurück
+      operationId: getAntrag
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: uuid
+          in: path
+          description: die UUID einer Aufgabe
+          schema:
+            type: string
+            format: uuid
+          required: true
+          example: 49dd5d3c-06d8-4bf3-ad28-0f65a9b7781b
+      responses:
+        "200":
+          description: Der Antrag zur Aufgabe wurde übermittelt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Antrag"
+        "400":
+          description: Die angegebene UUID ist ungültig
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "401":
+          description: Es ist kein gültiger Nutzer vorhanden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "403":
+          description: Der angemeldete Nutzer besitzt nicht die erforderlichen Rechte
+        "404":
+          description: Es wurde kein Aufgabe zur angegebenen UUID gefunden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "500":
+          description: Interner Server Fehler
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+  /rehaeinrichtungen:
+    get:
+      tags:
+        - Reha Einrichtungen
+      summary: Sucht Reha Einrichtungen
+      description: Sucht Reha Einrichtungen anhand des übergebenen Filters
+      operationId: suche
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: q
+          in: query
+          description: Das Suchkriterium
+          required: true
+          schema:
+            type: string
+          examples:
+            plz:
+              value: 70469
+              summary: Die PLZ eines Ortes
+            name:
+              value: Stuttgart
+              summary: Der Name eines Ortes
+        - name: umkreis
+          in: query
+          description: Die Umkreis
+          schema:
+            type: integer
+            format: int32
+          example: 50
+        - name: phase
+          in: query
+          description: Die Phase
+          schema:
+            type: string
+          example: Startphase
+        - name: durchfuehrungsart
+          in: query
+          description: Die Durchfuehrungsart
+          schema:
+            type: string
+          example: Ambulant
+      responses:
+        "200":
+          description: Es wurden Einrichtungen zum Filter gefunden
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RehaEinrichtung"
+        "401":
+          description: Es ist kein gültiger Nutzer vorhanden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "403":
+          description: Der angemeldete Nutzer besitzt nicht die erforderlichen Rechte
+        "500":
+          description: Interner Server Fehler
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "502":
+          description: Beim Aufruf eines externen Service ist ein Fehler ausgetreten
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+  /rehaeinrichtungen/autovervollstaendigungen:
+    get:
+      tags:
+        - Reha Einrichtungen
+      summary: Gibt alle RehaEinrichtungen zurück
+      description: Gibt alle RehaEinrichtungen zurück
+      operationId: getAllRehaeinrichtungen
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Es wurden alle Rehaeinrichtungen zurückgegeben
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RehaEinrichtungAutovervollstaendigung"
+        "401":
+          description: Es ist kein gültiger Nutzer vorhanden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "403":
+          description: Der angemeldete Nutzer besitzt nicht die erforderlichen Rechte
+        "500":
+          description: Interner Server Fehler
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "502":
+          description: Beim Aufruf eines externen Service ist ein Fehler ausgetreten
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+  /stammdaten/{vsnr}:
+    get:
+      tags:
+        - Stammdaten
+      summary: liefert Stammdaten
+      description: Liefert Stammdaten zu einer Versicherungsnummer
+      operationId: getStammdatenByVsnr
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: vsnr
+          in: path
+          description: Die Versicherungsnummer
+          required: true
+          schema:
+            type: string
+          example: 23270152B506
+      responses:
+        "200":
+          description: Die Stammdaten wurden erfolgreich übermittelt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Stammdaten"
+        "401":
+          description: Es ist kein gültiger Nutzer vorhanden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "403":
+          description: Der angemeldete Nutzer besitzt nicht die erforderlichen Rechte
+        "500":
+          description: Interner Server Fehler
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+  /papierantraege:
+    post:
+      tags:
+        - Papierantraege
+      summary: Erstellt einen neuen Papierantrag
+      description: Erstellt einen neuen Papierantrag mit den angegebenen Informationen
+      operationId: createPapierantrag
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Papierantrag
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Papierantrag"
+        required: true
+      responses:
+        "201":
+          description: Der Papierantrag wurde erstellt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Papierantrag"
+        "400":
+          description: Der Papierantrag enthaelt Fehler
+          content:
+            application/problem+json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Fehler"
+        "401":
+          description: Es ist kein gültiger Nutzer vorhanden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "403":
+          description: Der angemeldete Nutzer besitzt nicht die erforderlichen Rechte
+        "415":
+          description: Der ein unerwarteter Medientyp übergeben
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "500":
+          description: Interner Server Fehler
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "503":
+          description: Der Personendatenservice ist nicht erreichbar.
+  /papierantraege/entwurf:
+    post:
+      tags:
+        - Papierantraege
+      summary: Erstellt einen neuen Entwurf fuer einen Papierantrag
+      description: Erstellt einen neuen Entwurf fuer einen Papierantrag mit den angegebenen Informationen
+      operationId: createPapierantragEntwurf
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: PapierantragEnturf
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Papierantrag"
+        required: true
+      responses:
+        "201":
+          description: Der Entwurf fuer einen Papierantrag wurde erstellt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Papierantrag"
+        "400":
+          description: Der Entwurf enthaelt Fehler
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Fehler"
+        "401":
+          description: Es ist kein gültiger Nutzer vorhanden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "403":
+          description: Der angemeldete Nutzer besitzt nicht die erforderlichen Rechte
+        "415":
+          description: Der ein unerwarteter Medientyp übergeben
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "500":
+          description: Interner Server Fehler
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+  /papierantraege/entwurf/{vsnr}:
+    get:
+      tags:
+        - Papierantraege
+      summary: Gibt den Entwurf eines Papierantrags anhand der VSNR zurück
+      description: Gibt den Entwurf eines Papierantrags anhand der VSNR zurück
+      operationId: getPapierantragEntwurfByVsnr
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: vsnr
+          in: path
+          description: Die VSNR des Entwurfs
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            pattern: '^(0[23489]|[15][0-9]|2[01345689]|[37][89]|4[23489]|6[01345689]|8[0129])([0-8][0-9]|9[0-7])(0[0-9]|1[012])\d{2}[A-Z]\d{3}$'
+          example: 23270152B506
+      responses:
+        "200":
+          description: Der Entwurf eines Papierantrags wurde zurückgegeben
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Papierantrag"
+        "404":
+          description: Zu gegebener VSNR wurde kein Entwurf gefunden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Fehler"
+        "401":
+          description: Es ist kein gültiger Nutzer vorhanden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "403":
+          description: Der angemeldete Nutzer besitzt nicht die erforderlichen Rechte
+        "500":
+          description: Interner Server Fehler
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+  /papierantraege/erledigung-auf-andere-art-und-weise:
+    post:
+      tags:
+        - Papierantraege
+      summary: Initiert die Erledigung auf andere Art und Weise eines neuen Papierantrages
+      description: Initiert die Erledigung auf andere Art und Weise eines neuen Papierantrages mit den Informationen aus dem rvPuR-Absprung
+      operationId: verarbeitePapierantragErledigungAufAndereArtUndWeise
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Papierantrag mit VOID, AufgabenID und VSNR
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Papierantrag"
+        required: true
+      responses:
+        "201":
+          description: Der Entwurf fuer einen Papierantrag wurde erstellt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Papierantrag"
+        "400":
+          description: Der Entwurf enthaelt Fehler
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Fehler"
+        "401":
+          description: Es ist kein gültiger Nutzer vorhanden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "403":
+          description: Der angemeldete Nutzer besitzt nicht die erforderlichen Rechte
+        "415":
+          description: Der ein unerwarteter Medientyp übergeben
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "500":
+          description: Interner Server Fehler
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+  /papierantraege/ruecknahme:
+    post:
+      tags:
+        - Papierantraege
+      summary: Initiert die Ruecknahme eines neuen Papierantrages
+      description: Initiert die Ruecknahme eines neuen Papierantrages mit den Informationen aus dem rvPuR-Absprung
+      operationId: verarbeitePapierantragRuecknahme
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Papierantrag mit VOID, AufgabenID und VSNR
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Papierantrag"
+        required: true
+      responses:
+        "201":
+          description: Der Entwurf fuer einen Papierantrag wurde erstellt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Papierantrag"
+        "400":
+          description: Der Entwurf enthaelt Fehler
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Fehler"
+        "401":
+          description: Es ist kein gültiger Nutzer vorhanden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "403":
+          description: Der angemeldete Nutzer besitzt nicht die erforderlichen Rechte
+        "415":
+          description: Der ein unerwarteter Medientyp übergeben
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "500":
+          description: Interner Server Fehler
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+  /papierantraege/weiterbearbeitung-in-rvdialog:
+    post:
+      tags:
+        - Papierantraege
+      summary: Initiert die Weiterbearbeitung in rvDialog fuer einen neuen Papierantrag
+      description: Initiert die Weiterbearbeitung in rvDialog fuer einen neuen Papierantrag mit den Informationen aus dem rvPuR-Absprung
+      operationId: verarbeitePapierantragWeiterbearbeitungInRvDialog
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Papierantrag mit VOID, AufgabenID und VSNR
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Papierantrag"
+        required: true
+      responses:
+        "201":
+          description: Der Entwurf fuer einen Papierantrag wurde erstellt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Papierantrag"
+        "400":
+          description: Der Entwurf enthaelt Fehler
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Fehler"
+        "401":
+          description: Es ist kein gültiger Nutzer vorhanden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "403":
+          description: Der angemeldete Nutzer besitzt nicht die erforderlichen Rechte
+        "415":
+          description: Der ein unerwarteter Medientyp übergeben
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "500":
+          description: Interner Server Fehler
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+  /papierantraege/weiterbearbeitung-in-rvdialog-ohne-erfassung:
+    post:
+      tags:
+        - Papierantraege
+      summary: Initiert die Weiterbearbeitung in rvDialog fuer einen neuen Papierantrag
+      description: Initiert die Weiterbearbeitung in rvDialog fuer einen neuen Papierantrag mit den Informationen aus dem rvPuR-Absprung
+      operationId: verarbeitePapierantragOhneErfassungWeiterbearbeitungInRvDialog
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        description: Papierantrag mit VOID, AufgabenID und VSNR
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Papierantrag"
+        required: true
+      responses:
+        "201":
+          description: Der Entwurf fuer einen Papierantrag wurde erstellt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Papierantrag"
+        "400":
+          description: Der Entwurf enthaelt Fehler
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Fehler"
+        "401":
+          description: Es ist kein gültiger Nutzer vorhanden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "403":
+          description: Der angemeldete Nutzer besitzt nicht die erforderlichen Rechte
+        "415":
+          description: Der ein unerwarteter Medientyp übergeben
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "500":
+          description: Interner Server Fehler
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+  /papierantraege/entwurf/uuid/{uuid}:
+    get:
+      tags:
+        - Papierantraege
+      summary: Gibt einen Entwurf eines Papierantrag anhand seiner UUID zurück
+      description: Gibt einen Entwurf eines Papierantrag anhand seiner UUID zurück
+      security:
+        - bearerAuth: []
+      operationId: getPapierantragEntwurfByUuid
+      parameters:
+        - name: uuid
+          in: path
+          description: Die UUID des Entwurfs
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+          example: 49dd5d3c-06d8-4bf3-ad28-0f65a9b7781b
+      responses:
+        "200":
+          description: Der Entwurf eines Papierantrags wurde zurückgegeben
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Papierantrag"
+        "404":
+          description: Zu gegebener VSNR wurde kein Entwurf gefunden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Fehler"
+        "401":
+          description: Es ist kein gültiger Nutzer vorhanden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "403":
+          description: Der angemeldete Nutzer besitzt nicht die erforderlichen Rechte
+        "500":
+          description: Interner Server Fehler
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+  /papierantraege/{vorgangsId}/verarbeitungsart:
+    get:
+      tags:
+        - Papierantraege
+      summary: Ermittelt die aktuelle Verarbeitungsart des Antrags
+      description: Ermittelt die aktuelle Verarbeitungsart des Antrags
+      operationId: getVerarbeitungsartByVorgangsId
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: vorgangsId
+          in: path
+          description: Die VorgangsId eines Antrags
+          schema:
+            type: string
+          required: true
+          example: V250000022RVX1
+      responses:
+        "200":
+          description: Verarbeitungsart wurde ermittelt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Verarbeitungsart"
+        "401":
+          description: Es ist kein gültiger Nutzer vorhanden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "403":
+          description: Der angemeldete Nutzer besitzt nicht die erforderlichen Rechte
+        "404":
+          description: Die Verarbeitungsart konnte anhand der UUID nicht gefunden werden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "500":
+          description: Interner Server Fehler
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+  /antraege/{uuid}/dokumentendaten:
+    post:
+      tags:
+        - Verarbeitung
+      summary: Initialisierung Dokumentendaten zur Verarbeitung eines Antrages
+      description: Initialisierung von Dokumentendaten (JSON) zur Verarbeitung eines Antrages mit der Komponente zur Dokumentenerzeugung (Paperboy)
+      operationId: postDokumentendaten
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: uuid
+          in: path
+          description: Die UUID des Antrags
+          schema:
+            type: string
+            format: uuid
+          required: true
+          example: 49dd5d3c-06d8-4bf3-ad28-0f65a9b7781b
+      requestBody:
+        description: Die gewünschte Dokumentenklasse
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Dokumentenklasse"
+        required: true
+      responses:
+        "200":
+          description: Die Dokumentendaten wurden erstellt und als JSON zurück geliefert.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuftragsStatus"
+        "400":
+          description: Der angegebene UUID als Parameter ist ungültig
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "404":
+          description: Die Dokumentendaten konnten nicht initialisiert werden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "401":
+          description: Keine gültiger Benutzer
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "403":
+          description: Keine ausreichenden Rechte
+        "415":
+          description: Der ein unerwarteter Medientyp übergeben
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "500":
+          description: Interner Server Fehler
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+    get:
+      tags:
+        - Verarbeitung
+      summary: Gibt Dokumentendaten anhand einer AntragsId zurück
+      description: Gibt Dokumentendaten anhand einer AntragsId zurück
+      security:
+        - bearerAuth: []
+      operationId: getDokumentendaten
+      parameters:
+        - name: uuid
+          in: path
+          description: Die UUID des Antrags
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: uuid
+          example: 49dd5d3c-06d8-4bf3-ad28-0f65a9b7781b
+      responses:
+        "200":
+          description: Die Dokumentendaten wurden zurück geliefert.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuftragsStatus"
+        "400":
+          description: Der angegebene UUID als Parameter ist ungültig
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "404":
+          description: Die Dokumentendaten konnten nicht initialisiert werden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "401":
+          description: Keine gültiger Benutzer
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "403":
+          description: Keine ausreichenden Rechte
+        "415":
+          description: Der ein unerwarteter Medientyp übergeben
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "500":
+          description: Interner Server Fehler
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+  /antraege/{uuid}/dokumentenerzeugung/bewilligung:
+    post:
+      tags:
+        - Dokumentenerzeugung
+      summary: Initialisierung Dokumentenerzeugung zur Verarbeitung eines Bewilligungsantrages
+      description: Initialisierung der Dokumentenerzeugung (JSON) eines Bewilligungsantrages mit der Paperboykomponente (DoE)
+      operationId: postDokumentenerzeugungBewilligung
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: uuid
+          in: path
+          description: Die UUID des Antrags
+          schema:
+            type: string
+            format: uuid
+          required: true
+          example: 49dd5d3c-06d8-4bf3-ad28-0f65a9b7781b
+      requestBody:
+        description: Weitere Informationen zum Schreiben
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Bewilligungsdaten"
+        required: true
+      responses:
+        "200":
+          description: Die Dokumentenerzeugung (Bewilligung) wurden erstellt und als JSON zurück geliefert.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuftragsStatus"
+        "400":
+          description: Der angegebene UUID als Parameter ist ungültig
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "404":
+          description: Die Dokumentenerzeugung konnten nicht initialisiert werden
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "401":
+          description: Keine gültiger Benutzer
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "403":
+          description: Keine ausreichenden Rechte
+        "415":
+          description: Der ein unerwarteter Medientyp übergeben
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "500":
+          description: Interner Server Fehler
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+  /antraege/{uuid}/bewilligung:
+    post:
+      tags:
+        - Verarbeitung
+      summary: Bewilligung des Antrags
+      description: Bewilligung des Antrags
+      operationId: verarbeiteBewilligung
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: uuid
+          in: path
+          description: Die UUID eines Antrags
+          schema:
+            type: string
+            format: uuid
+          required: true
+          example: 49dd5d3c-06d8-4bf3-ad28-0f65a9b7781b
+      requestBody:
+        description: Details zum Versandergebnis der Antragsbewilligung
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VersandErgebnis"
+        required: true
+      responses:
+        "200":
+          description: Die Verarbeitung wurde erfolgreich durchgeführt.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Antrag"
+        "400":
+          description: Die Verarbeitung konnte wegen einer fehlerhaften Anfrage nicht durchgeführt werden.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "401":
+          description: Es ist kein gültiger Benutzer angemeldet.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "403":
+          description: Der Benutzer hat nicht die notwendigen Berechtigungen zur Verarbeitung des Antrags.
+        "415":
+          description: Es wurde ein unerwarteter Medientyp übergeben.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "500":
+          description: Interner Serverfehler
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+  /antraege/{uuid}/ablehnung:
+    post:
+      tags:
+        - Verarbeitung
+      summary: Ablehnung des Antrags
+      description: Ablehnung des Antrags
+      operationId: verarbeiteAblehnung
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: uuid
+          in: path
+          description: Die UUID eines Antrags
+          schema:
+            type: string
+            format: uuid
+          required: true
+          example: 49dd5d3c-06d8-4bf3-ad28-0f65a9b7781b
+      requestBody:
+        description: Details zum Versandergebnis der Antragsablehnung
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VersandErgebnis"
+        required: true
+      responses:
+        "200":
+          description: Die Verarbeitung wurde erfolgreich durchgeführt.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Antrag"
+        "400":
+          description: Die Verarbeitung konnte wegen einer fehlerhaften Anfrage nicht durchgeführt werden.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "401":
+          description: Es ist kein gültiger Benutzer angemeldet.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "403":
+          description: Der Benutzer hat nicht die notwendigen Berechtigungen zur Verarbeitung des Antrags.
+        "415":
+          description: Es wurde ein unerwarteter Medientyp übergeben.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "500":
+          description: Interner Serverfehler
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+  /antraege/{uuid}/sachverhaltsaufklaerung:
+    post:
+      tags:
+        - Verarbeitung
+      summary: Sachverhaltsaufklärung zu einem Antrag
+      description: Sachverhaltsaufklärung zu einem Antrag
+      operationId: verarbeiteSachverhaltsaufklaerung
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: uuid
+          in: path
+          description: Die UUID eines Antrags
+          schema:
+            type: string
+            format: uuid
+          required: true
+          example: 49dd5d3c-06d8-4bf3-ad28-0f65a9b7781b
+      requestBody:
+        description: Details zum Versandergebnis der Sachverhaltsaufklärung
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VersandErgebnis"
+        required: true
+      responses:
+        "200":
+          description: Die Verarbeitung wurde erfolgreich durchgeführt.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Antrag"
+        "400":
+          description: Die Verarbeitung konnte wegen einer fehlerhaften Anfrage nicht durchgeführt werden.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "401":
+          description: Es ist kein gültiger Benutzer angemeldet.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "403":
+          description: Der Benutzer hat nicht die notwendigen Berechtigungen zur Verarbeitung des Antrags.
+        "415":
+          description: Es wurde ein unerwarteter Medientyp übergeben.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "500":
+          description: Interner Serverfehler
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+  /antraege/{uuid}/erledigung-auf-andere-art-und-weise:
+    post:
+      tags:
+        - Verarbeitung
+      summary: Antragserledigung auf andere Art und Weise
+      description: Antragserledigung auf andere Art und Weise
+      operationId: verarbeiteErledigungAufAndereArtUndWeise
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: uuid
+          in: path
+          description: Die UUID eines Antrags
+          schema:
+            type: string
+            format: uuid
+          required: true
+          example: 49dd5d3c-06d8-4bf3-ad28-0f65a9b7781b
+      responses:
+        "200":
+          description: Die Verarbeitung wurde erfolgreich durchgeführt.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Antrag"
+        "400":
+          description: Die Verarbeitung konnte wegen einer fehlerhaften Anfrage nicht durchgeführt werden.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "401":
+          description: Es ist kein gültiger Benutzer angemeldet.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "403":
+          description: Der Benutzer hat nicht die notwendigen Berechtigungen zur Verarbeitung des Antrags.
+        "415":
+          description: Es wurde ein unerwarteter Medientyp übergeben.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "500":
+          description: Interner Serverfehler
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+  /antraege/{uuid}/storno:
+    post:
+      tags:
+        - Verarbeitung
+      summary: Stornierung des Antrags
+      description: Stornierung des Antrags
+      operationId: verarbeiteStornierung
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: uuid
+          in: path
+          description: Die UUID eines Antrags
+          schema:
+            type: string
+            format: uuid
+          required: true
+          example: 49dd5d3c-06d8-4bf3-ad28-0f65a9b7781b
+      responses:
+        "200":
+          description: Die Verarbeitung wurde erfolgreich durchgeführt.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Antrag"
+        "400":
+          description: Die Verarbeitung konnte wegen einer fehlerhaften Anfrage nicht durchgeführt werden.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "401":
+          description: Es ist kein gültiger Benutzer angemeldet.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "403":
+          description: Der Benutzer hat nicht die notwendigen Berechtigungen zur Verarbeitung des Antrags.
+        "415":
+          description: Es wurde ein unerwarteter Medientyp übergeben.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "500":
+          description: Interner Serverfehler
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+  /antraege/{uuid}/ruecknahme:
+    post:
+      tags:
+        - Verarbeitung
+      summary: Rücknahme des Antrags
+      description: Rücknahme des Antrags
+      operationId: verarbeiteRuecknahme
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: uuid
+          in: path
+          description: Die UUID eines Antrags
+          schema:
+            type: string
+            format: uuid
+          required: true
+          example: 49dd5d3c-06d8-4bf3-ad28-0f65a9b7781b
+      responses:
+        "200":
+          description: Die Verarbeitung wurde erfolgreich durchgeführt.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Antrag"
+        "400":
+          description: Die Verarbeitung konnte wegen einer fehlerhaften Anfrage nicht durchgeführt werden.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "401":
+          description: Es ist kein gültiger Benutzer angemeldet.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "403":
+          description: Der Benutzer hat nicht die notwendigen Berechtigungen zur Verarbeitung des Antrags.
+        "415":
+          description: Es wurde ein unerwarteter Medientyp übergeben.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "500":
+          description: Interner Serverfehler
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+  /antraege/{uuid}/weiterbearbeitung-in-rvdialog:
+    post:
+      tags:
+        - Verarbeitung
+      summary: Weiterbearbeitung des Antrags in rvDialog
+      description: Weiterbearbeitung des Antrags in rvDialog
+      operationId: verarbeiteBearbeitungInRvDialog
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: uuid
+          in: path
+          description: Die UUID eines Antrags
+          schema:
+            type: string
+            format: uuid
+          required: true
+          example: 49dd5d3c-06d8-4bf3-ad28-0f65a9b7781b
+      responses:
+        "200":
+          description: Die Verarbeitung wurde erfolgreich durchgeführt.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Antrag"
+        "400":
+          description: Die Verarbeitung konnte wegen einer fehlerhaften Anfrage nicht durchgeführt werden.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "401":
+          description: Es ist kein gültiger Benutzer angemeldet.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "403":
+          description: Der Benutzer hat nicht die notwendigen Berechtigungen zur Verarbeitung des Antrags.
+        "415":
+          description: Es wurde ein unerwarteter Medientyp übergeben.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "500":
+          description: Interner Serverfehler
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+  /antraege/{uuid}/doppelvergabe-weiterverarbeitung:
+    post:
+      tags:
+        - Verarbeitung
+      summary: Weiterverarbeitung des Antrags bei Doppelvergabe
+      description: Weiterverarbeitung des Antrags bei Doppelvergabe
+      operationId: verarbeiteDoppelvergabe
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: uuid
+          in: path
+          description: Die UUID eines Antrags
+          schema:
+            type: string
+            format: uuid
+          required: true
+          example: 49dd5d3c-06d8-4bf3-ad28-0f65a9b7781b
+      responses:
+        "200":
+          description: Die VerarbeWeiterverarbeitungitung wurde erfolgreich durchgeführt.
+        "400":
+          description: Die Weiterverarbeitung konnte wegen einer fehlerhaften Anfrage nicht durchgeführt werden.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "401":
+          description: Es ist kein gültiger Benutzer angemeldet.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "403":
+          description: Der Benutzer hat nicht die notwendigen Berechtigungen zur Verarbeitung des Antrags.
+        "415":
+          description: Es wurde ein unerwarteter Medientyp übergeben.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "500":
+          description: Interner Serverfehler
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+  /antraege/{uuid}/antragsdaten-aktualisieren:
+    post:
+      tags:
+        - Verarbeitung
+      summary: Die Antragsdaten werden mit den Personendaten aus rvDialog überschrieben
+      description: Die Antragsdaten werden mit den Personendaten aus rvDialog überschrieben
+      operationId: aktualisierungAntragsdaten
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: uuid
+          in: path
+          description: Die UUID eines Antrags
+          schema:
+            type: string
+            format: uuid
+          required: true
+          example: 49dd5d3c-06d8-4bf3-ad28-0f65a9b7781b
+      responses:
+        "200":
+          description: Die Aktualisierung wurde erfolgreich durchgeführt.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Antrag"
+        "400":
+          description: Die Aktualisierung konnte wegen einer fehlerhaften Anfrage nicht durchgeführt werden.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "401":
+          description: Es ist kein gültiger Benutzer angemeldet.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "403":
+          description: Der Benutzer hat nicht die notwendigen Berechtigungen zur Verarbeitung des Antrags.
+        "415":
+          description: Es wurde ein unerwarteter Medientyp übergeben.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+        "500":
+          description: Interner Serverfehler
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+  /ping:
+    get:
+      tags:
+        - Ping
+      summary: Kann als Server-Ping oder zur Auffrischung des CSRF-Tokens genutzt werden.
+      description: Kann als Server-Ping oder zur Auffrischung des CSRF-Tokens genutzt werden.
+      security:
+        - bearerAuth: []
+      operationId: ping
+      responses:
+        "200":
+          description: Endlich ein Gerät das Ping macht.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuftragsStatus"
+        "500":
+          description: Interner Serverfehler
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Antwort"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    Stammdaten:
+      type: object
+      required:
+        - vsnr
+      properties:
+        id:
+          type: string
+          format: uuid
+        vsnr:
+          type: string
+          example: 13240855M556
+        vorname:
+          maxLength: 255
+          type: string
+          example: Max
+        nachname:
+          maxLength: 255
+          type: string
+          example: Mustermann
+        geburtsdatum:
+          description: |
+            Geburtsdatum des Versicherten im Format "YYYY-MM-TT". Teilweise Angabe ist gültig. Jahr darf nicht "0000" sein.
+            Erlaubte Formate- YYYY-MM-TT, YYYY-00-00, YYYY-MM-00.
+          pattern: '^(\d{4,4})-(0[0-9]|1[0-2])-([0-3][0-9])'
+          type: string
+        geburtsort:
+          maxLength: 255
+          type: string
+          example: Musterort
+        geburtsland:
+          maxLength: 3
+          type: string
+          description: Der Länderschlüssel des Geburtsortes.
+        strasse:
+          maxLength: 255
+          type: string
+          example: Musterstrasse
+        hausnummer:
+          maxLength: 10
+          type: string
+          example: 10a
+        plz:
+          maxLength: 10
+          type: string
+        wohnort:
+          maxLength: 255
+          type: string
+          example: Musterhausen
+        land:
+          maxLength: 255
+          type: string
+        staatsangehoerigkeit:
+          type: string
+          maxLength: 255
+        vorsatzwort:
+          type: string
+          description: Vorsatzwort zum Namen der Person
+          example: Test-Vorsatzwort
+          maxLength: 20
+        namenszusatz:
+          type: string
+          description: Namenszusatz der Person
+          maxLength: 20
+          example: Test-namenszusatz
+        titel:
+          type: string
+          description: Titel der Person
+          maxLength: 20
+          example: Test-Titel
+        telefon:
+          type: string
+          description: Telefonummer der Person
+          maxLength: 50
+          example: 0123 567891011
+        telefax:
+          type: string
+          description: Telefax der Person
+          maxLength: 50
+          example: 0123 567891011
+        geschlecht:
+          type: string
+          description: Geschlecht des Versicherten (divers, männlich, weiblich, unbestimmt)
+          enum:
+            - M
+            - W
+            - D
+            - X
+        geburtsname:
+          type: string
+          description: Geburtsname der Person
+          maxLength: 30
+          example: Geburtsname
+        fruehererName:
+          maxLength: 255
+          type: string
+          example: Früherer Mustermann
+        artZugaenglichkeit:
+          $ref: "#/components/schemas/ArtZugaenglichkeit"
+    RehaEinrichtung:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        selbstmeldeportalId:
+          type: integer
+          format: int64
+        aresc:
+          type: string
+          maxLength: 255
+        name:
+          type: string
+          maxLength: 500
+        email:
+          type: string
+          maxLength: 50
+        telefonnummer:
+          type: string
+          maxLength: 50
+        distanz:
+          description: Entfernung zwischen PLZ/Ort Suche und Einrichtung
+          type: integer
+          format: int32
+        distanzVersicherter:
+          description: Entfernung zwischen PLZ Versicherter und Einrichtung
+          type: integer
+          format: int32
+        adresse:
+          $ref: "#/components/schemas/EinrichtungAnschrift"
+        postanschrift:
+          $ref: "#/components/schemas/EinrichtungAnschrift"
+        phasen:
+          type: array
+          items:
+            $ref: "#/components/schemas/Phase"
+    RehaEinrichtungAutovervollstaendigung:
+      type: object
+      properties:
+        id:
+          type: string
+          pattern: ^[0-9]*$
+        resc:
+          type: string
+          maxLength: 255
+        anbietername:
+          type: string
+          maxLength: 500
+        adresse:
+          $ref: "#/components/schemas/EinrichtungAnschriftAutovervollstaendigung"
+        phasen:
+          type: array
+          items:
+            type: string
+            maxLength: 255
+    RehaEinrichtungUpdate:
+      type: object
+      properties:
+        angebotId:
+          type: integer
+          format: int64
+        durchfuehrungsart:
+          type: string
+          maxLength: 500
+    Phase:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        selbstmeldeportalId:
+          type: integer
+          format: int64
+        name:
+          type: string
+          maxLength: 255
+        text:
+          type: string
+          maxLength: 255
+        freiePlaetze:
+          type: string
+          maxLength: 255
+        durchfuehrungsart:
+          type: string
+          maxLength: 500
+        dauer:
+          type: integer
+          format: int32
+        anzahlTrainingseinheiten:
+          type: integer
+          format: int32
+        dauerTrainingseinheiten:
+          type: integer
+          format: int32
+        distanz:
+          description: Entfernung zwischen PLZ/Ort Suche und Einrichtung
+          type: integer
+          format: int32
+        distanzVersicherter:
+          description: Entfernung zwischen PLZ Versicherter und Einrichtung
+          type: integer
+          format: int32
+        adresse:
+          $ref: "#/components/schemas/EinrichtungAnschrift"
+        postanschrift:
+          $ref: "#/components/schemas/EinrichtungAnschrift"
+    EinrichtungAnschrift:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        strasse:
+          maxLength: 255
+          type: string
+        hausnummer:
+          maxLength: 10
+          type: string
+        plz:
+          maxLength: 5
+          minLength: 5
+          type: string
+        ort:
+          maxLength: 255
+          type: string
+        adresszusatz:
+          maxLength: 255
+          type: string
+        anbindung:
+          maxLength: 255
+          type: string
+    EinrichtungAnschriftAutovervollstaendigung:
+      type: object
+      properties:
+        strasse:
+          maxLength: 255
+          type: string
+        hausnummer:
+          maxLength: 10
+          type: string
+        plz:
+          maxLength: 5
+          minLength: 5
+          type: string
+        ort:
+          maxLength: 255
+          type: string
+    Antrag:
+      type: object
+      properties:
+        uuid:
+          type: string
+          minLength: 36
+          maxLength: 36
+        vsnr:
+          type: string
+          minLength: 12
+          maxLength: 12
+          example: 13240855M556
+        status:
+          type: string
+          description: Status des Antrags
+          enum:
+            - ENTWURF
+            - VORGANG_WIRD_ERSTELLT
+            - VORGANG_ERZEUGT
+            - STATISTIK_ERFASST
+            - PAPIERANTRAG_GESPEICHERT
+            - DOPPELVERGABE_AUFGABE_ERSTELLT
+            - DOPPELVERGABE_PRUEFUNG_OK
+            - AUTOMATISCH
+            - PERSONENDATEN_AUFGABE_ERSTELLT
+            - RVPUR_AUFGABE_GESCHLOSSEN
+            - ANSPRUECHSPRUEFUNG_AUFGABE_ERSTELLT
+            - BEMERKUNG_ODER_ANHANG_AUFGABE_ERSTELLT
+            - BESCHEID_ABGESCHLOSSEN
+            - STATISTIK_ABGESCHLOSSEN
+            - AUFGABE_ABGESCHLOSSEN
+            - STAMMDATEN_FEHLER_AUFGABE_ERSTELLEN
+            - STAMMDATEN_FEHLER_AUFGABE_ERSTELLT
+            - STAMMDATEN_FEHLER_AUFGABE_SCHLIESSEN
+            - KONTOINFORMATION_FEHLER_AUFGABE_ERSTELLEN
+            - KONTOINFORMATION_FEHLER_AUFGABE_ERSTELLT
+            - KONTOINFORMATION_FEHLER_AUFGABE_SCHLIESSEN
+            - KONTOINFORMATION_ABGEFRAGT
+            - STATISTIKERFASSUNG_FEHLER_AUFGABE_ERSTELLEN
+            - STATISTIKERFASSUNG_FEHLER_AUFGABE_ERSTELLT
+            - STATISTIKERFASSUNG_FEHLER_AUFGABE_SCHLIESSEN
+            - STATISTIKABSCHLUSS_FEHLER_AUFGABE_ERSTELLEN
+            - STATISTIKABSCHLUSS_FEHLER_AUFGABE_ERSTELLT
+            - STATISTIKABSCHLUSS_FEHLER_AUFGABE_SCHLIESSEN
+            - AUFGABE_SCHLIESSEN_OHNE_STATISTIK
+            - DOPPELVERGABE_AUFGABE_SCHLIESSEN
+        eingangsdatum:
+          type: string
+          format: date
+        antragsart:
+          type: string
+          description: Art des Antrags
+          enum:
+            - E_ANTRAG
+            - PAPIERANTRAG
+        digitaleranhang:
+          type: boolean
+          description: Feststellung, ob ein digitaler Anhang vorliegt
+        strasse:
+          maxLength: 255
+          type: string
+          example: Musterstrasse
+        hausnummer:
+          maxLength: 10
+          type: string
+          example: 10a
+        plz:
+          maxLength: 10
+          type: string
+        wohnort:
+          maxLength: 255
+          type: string
+          example: Musterhausen
+        land:
+          maxLength: 255
+          type: string
+        vorname:
+          maxLength: 255
+          type: string
+          example: Max
+        nachname:
+          maxLength: 255
+          type: string
+          example: Mustermann
+        fruehererName:
+          maxLength: 255
+          type: string
+        vorsatzwort:
+          maxLength: 255
+          type: string
+        namenszusatz:
+          maxLength: 255
+          type: string
+        titel:
+          maxLength: 255
+          type: string
+        geburtsname:
+          maxLength: 255
+          type: string
+        geburtsdatum:
+          description: |
+            Geburtsdatum des Versicherten im Format "YYYY-MM-TT". Teilweise Angabe ist gültig. Jahr darf nicht "0000" sein.
+            Erlaubte Formate- YYYY-MM-TT, YYYY-00-00, YYYY-MM-00.
+          pattern: '^(\d{4,4})-(0[0-9]|1[0-2])-([0-3][0-9])'
+          type: string
+        geburtsort:
+          maxLength: 255
+          type: string
+          example: Musterhausen
+        geburtsland:
+          maxLength: 255
+          type: string
+        geschlecht:
+          maxLength: 1
+          minLength: 1
+          type: string
+        staatsangehoerigkeit:
+          type: string
+          maxLength: 255
+        einrichtungStartAuf:
+          type: string
+          maxLength: 500
+          example: Testeinrichtung, Musterstrasse 25, 12345 Msuterhausen
+        einrichtungTraining:
+          type: string
+          maxLength: 500
+          example: Testeinrichtung, Musterstrasse 25, 12345 Msuterhausen
+        telefon:
+          type: string
+          maxLength: 30
+        fax:
+          type: string
+          maxLength: 30
+        artZugaenglichkeit:
+          $ref: "#/components/schemas/ArtZugaenglichkeit"
+        bemerkungen:
+          type: string
+          maxLength: 10650
+        antragsdatum:
+          type: string
+          format: date
+        lastModifiedStart:
+          type: string
+          format: date-time
+        lastModifiedAuf:
+          type: string
+          format: date-time
+        lastModifiedTraining:
+          type: string
+          format: date-time
+        xml:
+          type: string
+        versichertenStammdaten:
+          type: array
+          items:
+            $ref: "#/components/schemas/Stammdaten"
+        kontoinformationen:
+          type: array
+          items:
+            $ref: "#/components/schemas/Kontoinformation"
+        einrichtungStartObjekt:
+          $ref: "#/components/schemas/RehaEinrichtung"
+        einrichtungAufObjekt:
+          $ref: "#/components/schemas/RehaEinrichtung"
+        einrichtungTrainingObjekt:
+          $ref: "#/components/schemas/RehaEinrichtung"
+        pruefergebnisse:
+          type: array
+          items:
+            $ref: "#/components/schemas/Pruefergebnis"
+        ktan:
+          $ref: "#/components/schemas/Ktan"
+    Antwort:
+      type: object
+      properties:
+        code:
+          nullable: true
+          type: integer
+          format: int32
+        nachricht:
+          nullable: true
+          type: string
+        bestandsfehler:
+          $ref: "#/components/schemas/Bestandsfehler"
+    Bestandsfehler:
+      type: object
+      required:
+        - vsnr
+        - name
+        - vorname
+      properties:
+        unerwartererFehler:
+          $ref: "#/components/schemas/UnerwartererFehler"
+        rvSystemFehlerCodes:
+          nullable: true
+          type: array
+          items:
+            type: string
+        vsnr:
+          type: string
+          example: 13240855M556
+        name:
+          type: string
+        vorname:
+          type: string
+    UnerwartererFehler:
+      type: object
+      nullable: true
+      properties:
+        fehlercode:
+          type: string
+        message:
+          type: string
+    Kontoinformation:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        vsnr:
+          type: string
+          pattern: '^(0[23489]|[15][0-9]|2[01345689]|[37][89]|4[23489]|6[01345689]|8[0129])([0-8][0-9]|9[0-7])(0[0-9]|1[012])\d{2}[A-Z]\d{3}$'
+          example: 23270152B506
+        wartezeit6in24m:
+          type: integer
+          format: int32
+          description: Anzahl entrichteter Pflichtbeiträge innerhalb der letzten 24 Monate
+        wartezeit180m:
+          type: integer
+          format: int32
+          description: Anzahl anrechenbarer Leistungen insgesamt
+        wartezeitfehler:
+          type: boolean
+          description: Feststellung, ob Wartezeit ermittelt werden kann
+        antragRehaMsat:
+          type: string
+          minLength: 1
+          maxLength: 1
+          description: Maßnamenart des Reha-Antrags
+        antragRehaArt:
+          type: string
+          minLength: 2
+          maxLength: 2
+          description: Antragsart des Reha-Antrags
+        massnahmeRehaElat:
+          type: string
+          minLength: 2
+          maxLength: 2
+          description: Erledigungsart der letzten Reha-Maßnahme
+        massnahmeRehaKobs:
+          type: string
+          description: Enddatum der letzten Reha-Maßnahme
+          example: "2017-01-01"
+          format: date
+        antragRenteLeat:
+          type: string
+          minLength: 2
+          maxLength: 2
+          description: Leistungsart des Rentenantrags
+        bezugRenteLeat:
+          type: string
+          minLength: 2
+          maxLength: 2
+          description: Leistungsart des Rentenbezugs
+        antragRenteTlrt:
+          type: string
+          minLength: 1
+          maxLength: 1
+          description: Teilrentenart des Rentenantrags
+        bezugRenteTlrt:
+          type: string
+          minLength: 1
+          maxLength: 1
+          description: Teilrentenart des Rentenbezugs
+        bezugRenteProzent:
+          type: string
+          pattern: '^\d{1,2}(\.\d{1,4})?$'
+          example: 95.7854
+        beamteneigenschaft:
+          type: boolean
+          description: Feststellung, ob eine eine Beamteneigenschaft vorliegt
+        rechtsbehelfRente:
+          type: boolean
+          description: Feststellung, ob eine Renten-Rechtsbehelfsverfahren vorliegt
+        rechtsbehelfReha:
+          type: boolean
+          description: Feststellung, ob eine Reha-Rechtsbehelfsverfahren vorliegt
+        beschaeftigungGruppe:
+          type: string
+          minLength: 3
+          maxLength: 3
+          description: Personengruppe einer laufenden Beschaeftigungsmeldung
+        beschaeftigungGrund:
+          type: string
+          minLength: 2
+          maxLength: 2
+          description: Abgabegrund einer laufenden Beschaeftigungsmeldung
+        beschaeftigungKobs:
+          type: string
+          example: "2017-01-01"
+          format: date
+          description: Datum einer laufenden Beschaeftigungsmeldung
+        altersteilzeitGruppe:
+          type: string
+          minLength: 3
+          maxLength: 3
+          description: Personengruppe einer Altersteilzeit-Meldung
+        altersteilzeitGrund:
+          type: string
+          minLength: 2
+          maxLength: 2
+          description: Abgabegrund einer Altersteilzeit-Meldung
+        altersteilzeitKobs:
+          type: string
+          example: "2018-01-01"
+          format: date
+          description: Datum einer Altersteilzeit-Meldung
+        selbstaendigkeit:
+          type: boolean
+          description: Feststellung, ob eine aktive Selbststaendigkeit vorliegt
+        rvSystemFehler:
+          type: string
+          maxLength: 300
+          minLength: 0
+          example: "ABB098"
+          description: Ein Fehler der aus dem Bestandsystem zurückgemeldet wird.
+        unerwarteterFehler:
+          type: string
+          maxLength: 300
+          minLength: 0
+          example: "rvSystem:bestand antwortet nicht"
+          description: Ein Fehler der beim Aufruf des Bestandsystems auftritt.
+        ktan:
+          $ref: "#/components/schemas/Ktan"
+    Pruefergebnis:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        parentId:
+          type: string
+          format: uuid
+        ergebnis:
+          $ref: "#/components/schemas/AntragPruefergebnis"
+        regelName:
+          $ref: "#/components/schemas/RegelName"
+        begruendung:
+          type: string
+        prioritaet:
+          type: integer
+          format: int64
+        anmerkung:
+          type: string
+        regelId:
+          type: integer
+          format: int64
+        created:
+          type: string
+          format: date-time
+        lastModified:
+          type: string
+          format: date-time
+        ktan:
+          $ref: "#/components/schemas/Ktan"
+    PruefergebnisUpdate:
+      type: object
+      properties:
+        regelName:
+          $ref: "#/components/schemas/RegelName"
+        antragPruefergebnis:
+          $ref: "#/components/schemas/AntragPruefergebnis"
+        begruendung:
+          type: string
+    Papierantrag:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        antrag:
+          $ref: "#/components/schemas/Antrag"
+        vorgangsId:
+          type: string
+          minLength: 14
+          maxLength: 14
+        aufgabenId:
+          type: string
+          minLength: 14
+          maxLength: 14
+        versicherter:
+          $ref: "#/components/schemas/Stammdaten"
+        einrichtung1:
+          $ref: "#/components/schemas/RehaEinrichtung"
+        einrichtung2:
+          $ref: "#/components/schemas/RehaEinrichtung"
+    AntragArchivPdf:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        vsnr:
+          type: string
+        antragsdatum:
+          type: string
+          format: date
+        pdf:
+          type: string
+          description: Das PDF ist als BASE64 codierter String enthalten.
+    Ergebnis:
+      type: object
+      description: Ergebnis des Antrags
+      required:
+        - wert
+      properties:
+        wert:
+          $ref: "#/components/schemas/AntragPruefergebnis"
+    AntragPruefergebnis:
+      type: string
+      description: |
+        * ERFUELLT - Regel wurde erfuellt
+        * NICHT_ERFUELLT_ABLEHNEN - Regel wurde nicht erfuellt. Der Sachberarbeiter muss das Ergebnis manuell ueberpruefen.
+        * NICHT_ERFUELLT_AUSSTEUERN - Regel wurde nicht erfuellt. Der Antrag wird automatisch abgelehnt.
+        * AUSSTEUERN - Regel konnte nicht geprueft werden.
+      enum:
+        - ERFUELLT
+        - NICHT_ERFUELLT_ABLEHNEN
+        - NICHT_ERFUELLT_AUSSTEUERN
+        - AUSSTEUERN
+    Fehler:
+      type: object
+      required:
+        - code
+        - feld
+      properties:
+        code:
+          $ref: "#/components/schemas/Fehlercode"
+        feld:
+          type: string
+          example: Fehlerfeld-X
+    Fehlercode:
+      type: string
+      enum:
+        - FELD_UNGUELTIG
+        - FELD_LEER
+        - FELD_LAENGE
+        - STAMMDATEN_ABWEICHUNG
+    Antragsdaten:
+      type: object
+      properties:
+        vsnr:
+          type: string
+          example: 13240855M556
+        art:
+          type: string
+          example: Antrag RVFit
+        antragsdatum:
+          type: string
+          format: date
+          example: 2023-06-28
+        eingangsdatum:
+          type: string
+          format: date
+          example: 2023-06-29
+        rehaphase:
+          type: array
+          minItems: 3
+          maxItems: 3
+          description: Einrichtungsschlüssel RESC pro Reha-Phase
+          items:
+            type: object
+            properties:
+              phase:
+                $ref: "#/components/schemas/PhaseEnum"
+              einrichtung:
+                description: Rehaeinrichtungsschlüssel
+                type: string
+                example: 1
+    PhaseEnum:
+      type: string
+      description: Phase
+      enum:
+        - STARTPHASE
+        - TRAININGSPHASE
+        - AUFFRISCHUNG
+    RegelName:
+      type: string
+      description: |
+        *  REGEL_ERFUELLT(0) - Immer Erfüllt.
+        *  REGEL_AUSSTEUERN(1) - Immer aussteuern.
+        *  REGEL_NICHTERFUELLT(2) - Nie Erfüllt.
+        *  REGEL_NICHTERFUELLT_ABLEHNEN(3) - Gibt immer Nicht Erfüllt Ablehnen zurück.
+        *  REGEL_ABGLEICH_VSNR(4) - Prüft ob Vsnr der Stammdaten im Antrag mit denen aus dem Konto übereinstimmen.
+        *  REGEL_ABGLEICH_NACHNAME(5) - Prüft ob Nachname der Stammdaten im Antrag mit denen aus dem Konto übereinstimmen.
+        *  REGEL_ABGLEICH_VORNAME(6) - Prüft ob Vorname  der Stammdaten im Antrag mit denen aus dem Konto übereinstimmen.
+        *  REGEL_ABGLEICH_GEBURTSDATUM(7) - Prüft ob Geburtsdatum der Stammdaten im Antrag mit denen aus dem Konto übereinstimmen.
+        *  REGEL_ABGLEICH_STRASSE(8) - Prüft ob Strasse der Stammdaten im Antrag mit denen aus dem Konto übereinstimmen.
+        *  REGEL_ABGLEICH_HAUSNUMMER(9) - Prüft ob Hausnummer der Stammdaten im Antrag mit denen aus dem Konto übereinstimmen.
+        *  REGEL_ABGLEICH_PLZ(10) - Prüft ob Plz der Stammdaten im Antrag mit denen aus dem Konto übereinstimmen.
+        *  REGEL_ABGLEICH_WOHNORT(11) - Prüft ob Wohnort der Stammdaten im Antrag mit denen aus dem Konto übereinstimmen.
+        *  REGEL_ABGLEICH_LAND(12) - Prüft ob Land der Stammdaten im Antrag mit denen aus dem Konto übereinstimmen.
+        *  REGEL_ABGLEICH_STAATSANGEHOERIGKEIT(13) - Prüft ob Staatsangehoerigkeit der Stammdaten im Antrag mit denen aus dem Konto übereinstimmen.
+        *  REGEL_STAATSANGEHOERIGKEIT(14) - Prüft die Staatsangehörigkeit.
+        *  REGEL_EINRICHTUNGANGEBOTEINDEUTIG(15) - Prüft ob pro Einrichtung und Phase nur ein Angebot existiert.
+        *  REGEL_EINRICHTUNGDURCHFUEHRUNGSARTEINDEUTIG(16) - Prüft ob alle Phasen von der gleichen Eirnichtung stammen.
+        *  REGEL_EINRICHTUNGFREIEPLAETZE(17) - Prüft ob die Einrichtung freie Plätze hat.
+        *  REGEL_EINRICHTUNGVORHANDENUNDIDENTISCH(18) - Prüft ob die Einrichtungen vollständig sind.
+        *  REGEL_ANTRAGALTERSRENTE(19) - Prüft ob ein Antrag auf Altersrente existiert.
+        *  REGEL_ANTRAGEMRENTE(20) - Prüft ob ein Antrag auf EM Renter vorliegt.
+        *  REGEL_BEAMTENEIGENSCHAFT_BEZUEGE(21) - Prüft ob der Versicherte verbeamtet mit Versorgungsbezügen ist.
+        *  REGEL_BEAMTENEIGENSCHAFT_ANWARTSCHAFT(22) - Prüft ob der Versicherte verbeamtet mit Versorgungsanwartschaften ist.
+        *  REGEL_BEZUGALTERSRENTE(23) - Prüft ob ein laufender Bezug einer Altersrente Rente besteht.
+        *  REGEL_BEZUGEMRENTE(24) - Prüft ob ein laufender Bezug einer EM Rente besteht.
+        *  REGEL_LAUFENDERREHAANTRAG(25) - Prüft ob ein laufender Reha Antrag vorliegt.
+        *  REGEL_MASSNAHME(26) - Prüft auf Maßnahmearten und -datum.
+        *  REGEL_WARTEZEITPRUEFUNG(27) - Prüft Wartezeiten.
+        *  REGEL_WIDERSPRUCHSVERFAHREN(28); - Prüft ob ein Widerspruchsverfahren läuft.
+        *  REGEL_AKTIVEBESCHAEFTIGUNG(29) - Prüft ob eine aktive Beschäftigung vorliegt.
+        *  REGEL_ALTERSTEILZEIT(30) - Prüft ob eine Altersteilzeit vorliegt.
+        *  REGEL_AUFENTHALT(31) - Prüft ob ein Aufenthalt außerhalb von Deutschland vorliegt.
+        *  REGEL_EINRICHTUNG_DISTANZ(32) - Prüft ob die Einrichtung >50 km von PLZ des Versicherten entfernt ist.
+        *  REGEL_BEMERKUNG(33) - Prüft ob ein Bemerkung im Antrag eingetragen ist
+        *  REGEL_AUTO_EINRICHTUNG_ENABLED(34) - Prüft ob die AUTOMATISCHE Einrichtungsprüfung ENABLED/DISABLED ist.
+        *  REGEL_DIGITALER_ANHANG(35) - Prüft, ob zu einem eAntrag ein digitaler Anhang hinzugefügt wurde.
+      enum:
+        - REGEL_ERFUELLT
+        - REGEL_AUSSTEUERN
+        - REGEL_NICHTERFUELLT
+        - REGEL_NICHTERFUELLT_ABLEHNEN
+        - REGEL_ABGLEICH_VSNR
+        - REGEL_ABGLEICH_NACHNAME
+        - REGEL_ABGLEICH_VORNAME
+        - REGEL_ABGLEICH_GEBURTSDATUM
+        - REGEL_ABGLEICH_STRASSE
+        - REGEL_ABGLEICH_HAUSNUMMER
+        - REGEL_ABGLEICH_PLZ
+        - REGEL_ABGLEICH_WOHNORT
+        - REGEL_ABGLEICH_LAND
+        - REGEL_ABGLEICH_STAATSANGEHOERIGKEIT
+        - REGEL_STAATSANGEHOERIGKEIT
+        - REGEL_EINRICHTUNGANGEBOTEINDEUTIG
+        - REGEL_EINRICHTUNGDURCHFUEHRUNGSARTEINDEUTIG
+        - REGEL_EINRICHTUNGFREIEPLAETZE
+        - REGEL_EINRICHTUNGVORHANDENUNDIDENTISCH
+        - REGEL_ANTRAGALTERSRENTE
+        - REGEL_ANTRAGEMRENTE
+        - REGEL_BEAMTENEIGENSCHAFT_BEZUEGE
+        - REGEL_BEAMTENEIGENSCHAFT_ANWARTSCHAFT
+        - REGEL_BEZUGALTERSRENTE
+        - REGEL_BEZUGEMRENTE
+        - REGEL_LAUFENDERREHAANTRAG
+        - REGEL_MASSNAHME
+        - REGEL_WARTEZEITPRUEFUNG
+        - REGEL_WIDERSPRUCHSVERFAHREN
+        - REGEL_AKTIVEBESCHAEFTIGUNG
+        - REGEL_ALTERSTEILZEIT
+        - REGEL_AUFENTHALT
+        - REGEL_EINRICHTUNG_DISTANZ
+        - REGEL_BEMERKUNG
+        - REGEL_AUTO_EINRICHTUNG_ENABLED
+        - REGEL_DIGITALER_ANHANG
+    Ktan:
+      maxLength: 2
+      minLength: 2
+      type: string
+      example: "24"
+    AntragStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          description: Status des Antrags
+          enum:
+            - ENTWURF
+            - VORGANG_WIRD_ERSTELLT
+            - VORGANG_ERZEUGT
+            - STATISTIK_ERFASST
+            - PAPIERANTRAG_GESPEICHERT
+            - DOPPELVERGABE_AUFGABE_ERSTELLT
+            - DOPPELVERGABE_PRUEFUNG_OK
+            - AUTOMATISCH
+            - PERSONENDATEN_AUFGABE_ERSTELLT
+            - RVPUR_AUFGABE_GESCHLOSSEN
+            - ANSPRUECHSPRUEFUNG_AUFGABE_ERSTELLT
+            - BEMERKUNG_ODER_ANHANG_AUFGABE_ERSTELLT
+            - BESCHEID_ABGESCHLOSSEN
+            - STATISTIK_ABGESCHLOSSEN
+            - AUFGABE_ABGESCHLOSSEN
+            - STAMMDATEN_FEHLER_AUFGABE_ERSTELLEN
+            - STAMMDATEN_FEHLER_AUFGABE_ERSTELLT
+            - STAMMDATEN_FEHLER_AUFGABE_SCHLIESSEN
+            - KONTOINFORMATION_FEHLER_AUFGABE_ERSTELLEN
+            - KONTOINFORMATION_FEHLER_AUFGABE_ERSTELLT
+            - KONTOINFORMATION_FEHLER_AUFGABE_SCHLIESSEN
+            - KONTOINFORMATION_ABGEFRAGT
+            - STATISTIKERFASSUNG_FEHLER_AUFGABE_ERSTELLEN
+            - STATISTIKERFASSUNG_FEHLER_AUFGABE_ERSTELLT
+            - STATISTIKERFASSUNG_FEHLER_AUFGABE_SCHLIESSEN
+            - STATISTIKABSCHLUSS_FEHLER_AUFGABE_SCHLIESSEN
+            - STATISTIKABSCHLUSS_FEHLER_AUFGABE_ERSTELLT
+            - STATISTIKABSCHLUSS_FEHLER_AUFGABE_ERSTELLEN
+            - AUFGABE_SCHLIESSEN_OHNE_STATISTIK
+            - DOPPELVERGABE_AUFGABE_SCHLIESSEN
+    Dokumentenklasse:
+      type: object
+      description: Dokumentenklasse des Schreibens; TODO aufteilen in endpoints
+        (Hinweis) Bewilligung bereits ausgelagert in seperaten Endpoint '/antraege/{uuid}/dokumentenerzeugung/bewilligung'
+        TODO Dokumentenklasse komplett löschen wenn alle Enpoints seperiert
+      required: [vorlage]
+      properties:
+        vorlage:
+          type: string
+          description: Beschreibt welche Vorlagenart gewählt werden soll.
+          enum:
+            - BEWILLIGUNG
+            - ABLEHNUNG
+            - SACHVERHALTSAUFKLAERUNG
+        freitextVersicherter:
+          type: string
+          description: Freitext an die Adresse des Versicherten
+          maxLength: 10000
+    Bewilligungsdaten:
+      type: object
+      description: Daten des Bewilligungsschreibens
+      properties:
+        freitextVersicherter:
+          type: string
+          description: Freitext an die Versicherte Person
+          maxLength: 10000
+        freitextEinrichtung:
+          type: string
+          description: Freitext an die Einrichtung
+          maxLength: 10000
+    VersandErgebnis:
+      type: object
+      required: [status]
+      properties:
+        auftragId:
+          type: string
+          description: AuftragID für DiLoop - nur notwendig, wenn auch Bescheid erstellt werden muss.
+          format: uuid
+          example: 49dd5d3c-06d8-4bf3-ad28-0f65a9b7781b
+        status:
+          type: string
+          description: |
+            Status der Verarbeitung eines Antrages
+             -  FEHLER(0) - Bei der Verarbeitung kam es zu Fehlern.
+             -  VERSAND(1) - Der Antrag wurde versand.
+          enum:
+            - FEHLER
+            - VERSAND
+        meldung:
+          type: string
+    Verarbeitungsart:
+      type: object
+      properties:
+        art:
+          type: string
+          description: |
+            Art der Verarbeitung eines Antrages
+            -  BEWILLIGUNG(0) - Der Antrag soll mit einer Bewilligung verarbeitet werden.
+            -  ABLEHNUNG(1) - Der Antrag soll mit einer Ablehnung verarbeitet werden.
+            -  SACHVERHALTSAUFKLAERUNG(2) - Der Antrag erfordert eine Sachverhaltsaufklaerung zur weiteren Verarbeitung.
+            -  ERLEDIGUNG_ANDERE_ART_UND_WEISE(3) - Der Antrag wird auf sonstige Art und Weise verarbeitet (bspw. Todesfall).
+            -  STORNO(4) - Der Antrag wurde storniert.
+            -  RUECKNAHME(5) - Der Antrag wurde zurückgenommen.
+            -  GESPERRT(6) - Der Antrag ist gesperrt zur Verarbeitung
+            -  WEITERBEARBEITUNG_IN_RVDIALOG(7) - Der Antrag wird in rvDialog bearbeitet.
+            - IN_BEARBEITUNG(8) - Der Antrag ist erfasst und befindet sich in Bearbeitung.
+          enum:
+            - BEWILLIGUNG
+            - ABLEHNUNG
+            - SACHVERHALTSAUFKLAERUNG
+            - ERLEDIGUNG_ANDERE_ART_UND_WEISE
+            - STORNO
+            - RUECKNAHME
+            - GESPERRT
+            - WEITERBEARBEITUNG_IN_RVDIALOG
+            - IN_BEARBEITUNG
+    ArtZugaenglichkeit:
+      type: string
+      description: |
+        Gueltige Art der Zustellung.
+        - Braille (Kurzschrift) 
+        - Braille (Vollschrift)
+        - CD-ROM (Schriftdatei)
+        - Grossdruck
+        - Hoermedium (CD-ROM/Daisy)
+      enum:
+        - BRAILLE_KURZSCHRIFT
+        - BRAILLE_VOLLSCHRIFT
+        - CD_ROM
+        - GROSSDRUCK
+        - HOERMEDIUM
+    AuftragsStatus:
+      type: object
+      properties:
+        auftragId:
+          type: string
+          format: uuid
+          example: 9272B231-8EA5-4B37-919C-43E32BF48792
+        status:
+          type: string
+          enum:
+            - UI_INTERAKTION_NOETIG
+            - AUSSTEHEND
+            - IN_BEARBETUNG
+            - VOLLENDET
+            - FEHLER
+          default: FEHLER
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/Antwort"
+        debug:
+          type: object
+          properties:
+            diloopResponse:
+              type: string
+            mappingResult:
+              type: object
+          example: ["DILOOP_RESPONSE", "MAPPING_RESULT"]
