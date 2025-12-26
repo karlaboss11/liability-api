@@ -1,0 +1,51 @@
+---
+apiVersion: backstage.io/v1alpha1
+kind: System # https://backstage.io/docs/features/software-catalog/descriptor-format/#kind-system
+metadata:
+  name: 2fa-43-fit # ID des IT-Produkts minus "rvsm-"-Präfix
+  title: RV Fit (ITP43 - Fit)
+  labels:
+    app.kubernetes.io/part-of: 2fa
+    de.deutscherv.rvsm/itp: "43"
+    de.deutscherv.rvsm/release: "1.0.0"
+  tags:
+    - focus
+  links:
+    - url: https://rvwiki.drv.drv/x/4YP6Fg
+      title: CDP | IT-Produkt Fit
+      icon: docs
+  description: |-
+    Das IT-Produkt RV Fit wurde im Modernsystem neu entwickelt und an das Bestandssystem angebunden. Es umfasst die maschinelle Unterstützung der Sachbearbeitung im Antragsverfahren (Papierantrag + eAntrag), bei der Anspruchsprüfung, bei der Einrichtungsprüfung über die Bescheiderteilung bis hin zur statistischen Dokumentation einer RV Fit-Leistung im Bestandssystem.
+
+    Im Falle eines nicht eindeutigen maschinellen Prüfergebnisses wird die Sachbearbeitung über die jeweiligen Aussteuerungsseiten navigiert, um die manuellen Änderungen in die maschinell unterstützte Bescheiderteilung zurückzuführen.
+
+    Im Falle eines eindeutigen maschinellen Prüfergebnisses ist ein Eingreifen der Sachbearbeitung aufgrund des vollautomatisierten Bearbeitungsprozesses nicht erforderlich.
+spec:
+  type: it-produkt
+  owner: Team_Two-Face # Das sind die LDAP-Gruppen abzüglich des "_DRV_rvEvolution_"-Präfixes
+  domain: berechnung
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component # https://backstage.io/docs/features/software-catalog/descriptor-format/#kind-component
+metadata:
+  name: rvfit-backend
+  title: RV Fit (Backend)
+  description: Backend für rvFit
+  annotations:
+    sonarqube.org/project-key: rvevo-rvsmfit:rvfit-backend
+    jfrog-artifactory/image-name: rvsm-2fa-43-fit/rvfit-backend
+    backstage.io/kubernetes-id: "Platzhalter-muss-vorhanden-sein-wird-jedoch-von-kubernetes-label-selector-ueberschrieben"
+    backstage.io/kubernetes-label-selector: de.deutscherv.rvsm/long-id=rvsm-2fa-43-fit-rvfit-backend # siehe https://rvwiki.drv.drv/x/axPUHg
+    # Label muss zuvor im App-of-Apps ergänzt werden
+    # argocd/app-selector: gitops.drv.drv/stage-argocd-arti1=rvsm-2fa-43-fit-rvfit-backend
+    # argocd/instance-name: arti1
+    janus-idp.io/tekton: rvfit-backend # Name der zuzuordnenden Komponente (also die aktuelle)
+    jira/project-key: EVORVF2 # Projektname und Komponente des IT-Produktes; Falls einzelne Bestandteile eigene Komponenten haben, stattdessen auf Ebene "Component" definieren
+    jira/component: Fit-RVFit
+spec:
+  type: service
+  lifecycle: experimental
+  owner: Team_Two-Face # Das sind die LDAP-Gruppen abzüglich des "_DRV_rvEvolution_"-Präfixes
+  system: 2fa-43-fit # ID des IT-Produkts minus "rvsm-"-Präfix
+  providesApis:
+    - rvfit-api # Slug des Bitbucket-Repos

@@ -1,0 +1,6 @@
+# TODO: Adapt file for proper dockerignore files. Currently pipeline failes if the ignored files aren't found
+# *
+# !target/*-runner
+# !target/*-runner.jar
+# !target/lib/*
+# !target/quarkus-app/*

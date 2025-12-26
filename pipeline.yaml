@@ -1,0 +1,284 @@
+$schema: https://schemas.drv.drv/rvsm/5pl/pipeline-products-iac/pipelines
+
+arti-deploy-config:
+  snapshot-branch: &snapshot-branch arti1-snapshot
+  prerelease-branch: &prerelease-branch arti1-prerelease
+  release-branch: &release-branch arti1-release
+  argo-instance: &argo-instance gitops-arti1.apps.os-evo.entw.bund.drv
+
+auto_deploy_with_digest: True
+
+container:
+  # Name der container registry
+  # default wenn nicht gesetzt: "zar.entw.bund.drv/bund-rvevo-docker/"
+  containerregistry: null
+  # Name des Pfads in der container registry
+  # default wenn nicht gesetzt: Bitbucket Projekt - z.B. "rvsm-2fa-43-Fit"
+  containerimagepath: null
+  # Name des container image
+  # default wenn nicht gesetzt: Bitbucket Repository Name - z.B. "rvfit-frontend"
+  containerimagename: null
+
+container-metadata:
+  ocilabels:
+    # default: authors dieses Parameters, sonst authors (siehe oben), sonst commit Mailadresse aus Bitbucket, der die Pipeline angestoßen hat
+    authors: null
+    # default: "https://zar.entw.bund.drv/ui/repos/tree/General/bund-rvevo-docker/" + lastportionprojectname + "/" + reponame + "/" + targetimagetag
+    url: null
+    # default: "https://git.drv.drv/projects/" + projectkey + "/repos/" + reponame + "/browse"
+    documentation: null
+    # default: "https://git.drv.drv/projects/" + projectkey + "/repos/" + reponame + "/browse"
+    source: null
+    # default: "Deutsche Rentenversicherung - rvEvolution"
+    vendor: null
+    # default: "siehe LICENSE.md im Quelltext"
+    licenses: null
+
+# Kontext innerhalb des Bitbucket repositories für den code compile
+# e.g. pom.xml
+# default wenn nicht gesetzt: "." (/ Ebene des git repositories)
+codebuildcontext: null
+
+# Ort des Containerfiles im git repository
+# default wenn nicht gesetzt: "." (/ Ebene des git repositories)
+# default in der java pipeline: "./src/main/docker/Dockerfile.jvm"
+containerfile: src/main/docker/Dockerfile.jvm
+
+# Flag, ob das Austauschen des Images mit dem Image Digest, oder nur auf den Tagnamen gepinned werden soll
+# True / False - Default False
+# False: rvsm-2fa-00-irp/referenz-quarkus-be:1.4.6
+# True:  rvsm-2fa-00-irp/referenz-quarkus-be:1.4.6@sha-256:8612222fde4e1b343b4b2644cbe28673af9124cbad07da5f4953a86932a35d32
+# auto_deploy_with_digest: False
+
+# Gemeinsam genutzte Werte, unten via YAML-Merge (<<:) integriert.
+x-shared:
+  deployment-targets: &deployment_common
+    repository: ssh://git@git.service.zd.drv:7999/rvevo-rvsmfit/rvsm-2fa-43-fit-release.git
+    yq_selector: .image
+    set_chart_app_version: true
+
+# Version des zu verwendenden Build-Tools aus dem sich das Image ableitet, z.B. die Java-Version
+buildtoolversion:
+  java: java21
+
+deployment-targets:
+  # DEV Entwicklungs-/Testumgebungen
+  - { environment: DEV1_DEV, branch: dev1-dev, argocd_instance: gitops-dev1.apps.os-evo.entw.bund.drv, argocd_application: rvfit-be-dev, path: rvfit-backend/values.yaml, <<: *deployment_common }
+  - { environment: DEV1_DEVOPS, branch: dev1-devops, argocd_instance: gitops-dev1.apps.os-evo.entw.bund.drv, argocd_application: rvfit-be-devops, path: rvfit-backend/values.yaml, <<: *deployment_common }
+  - { environment: DEV1_DEMO, branch: dev1-demo, argocd_instance: gitops-dev1.apps.os-evo.entw.bund.drv, argocd_application: rvfit-be-demo, path: rvfit-backend/values.yaml, <<: *deployment_common }
+  - { environment: DEV1_E2E, branch: dev1-e2e, argocd_instance: gitops-dev1.apps.os-evo.entw.bund.drv, argocd_application: rvfit-be-e2e, path: rvfit-backend/values.yaml, <<: *deployment_common }
+  - { environment: DEV1_SHARED1, branch: dev1-shared1, argocd_instance: gitops-dev1.apps.os-evo.entw.bund.drv, argocd_application: rvfit-be-shared1, path: rvfit-backend/values.yaml, <<: *deployment_common }
+  - { environment: DEV1_SHARED2, branch: dev1-shared2, argocd_instance: gitops-dev1.apps.os-evo.entw.bund.drv, argocd_application: rvfit-be-shared2, path: rvfit-backend/values.yaml, <<: *deployment_common }
+  - { environment: DEV1_SHARED3, branch: dev1-shared3, argocd_instance: gitops-dev1.apps.os-evo.entw.bund.drv, argocd_application: rvfit-be-shared3, path: rvfit-backend/values.yaml, <<: *deployment_common }
+  - { environment: DEV1_SHARED4, branch: dev1-shared4, argocd_instance: gitops-dev1.apps.os-evo.entw.bund.drv, argocd_application: rvfit-be-shared4, path: rvfit-backend/values.yaml, <<: *deployment_common }
+  - { environment: DEV1_SHARED5, branch: dev1-shared5, argocd_instance: gitops-dev1.apps.os-evo.entw.bund.drv, argocd_application: rvfit-be-shared5, path: rvfit-backend/values.yaml, <<: *deployment_common }
+  # ART Integration
+  - { environment: SNAPSHOT, branch: *snapshot-branch, argocd_instance: *argo-instance, argocd_application: rvfit-be-snapshot, path: rvfit-backend/values.yaml, <<: *deployment_common }
+  - { environment: PRERELEASE, branch: *prerelease-branch, argocd_instance: *argo-instance, argocd_application: rvfit-be-prerelease, path: rvfit-backend/values.yaml, <<: *deployment_common }
+  - { environment: RELEASE, branch: *release-branch, argocd_instance: *argo-instance, argocd_application: rvfit-be-release, path: rvfit-backend/values.yaml, <<: *deployment_common }
+
+# Erzeugt erlaubte Werte in der sonar-project Konfiguration, um z.B. den Pfad der Sourcen zu ändern
+# sonar:
+#   sources: "apps,libs"
+#   tests: "apps,libs"
+#   test:
+#     inclusions: "libs/**/*.spec.ts,apps/**/*.spec.ts,apps/**/*.spec.js,apps/**/*.spec.jsx,apps/**/*.test.js,apps/**/*.test.jsx"
+#     exclusions: "somedir/**/*.filepattern"
+#   coverage:
+#      exclusions: "somedir/**/*.filepattern"
+
+# Webhook Definitionen für Ausstiegspunkte in der Pipeline
+# application-test:
+#   - name: SHARED-1 # Name des Targets
+#     url: https://npm-application-test-route-rvevo-pipeline-products-iac-dev-b.apps.os-evo.entw.bund.drv # URL der Remote pipeline
+#     secret-name: name # noch nicht genutzt, wird aber in Zukunft der Name des Secrets sein, in dem das passwort für den Webhook Eventlistener steht
+#     pipeline-name: npm-application-test-pipeline # Der Name der aufzurufenden Pipeline
+#     payload: # Dieses dictionary wird automatisch in JSON formatiert und als payload an den Eventlistener geschickt
+#       repository: "ssh://git@git.service.zd.drv:7999/rvevo-rvsmsbp/rvsm-1fe-41-sbp-playwright.git"
+#       revision: "feature/EVODSPUI-369-npm-pipeline-um-konfigurierbaren-e2e-schritt-erweitern"
+#       target-url: "https://portal-entw-shared1.apps.os-evo.entw.bund.drv"
+#       test-tags: "@dev"
+
+# siehe application-test
+# pre-deploy: []
+
+# siehe application-test
+# post-deploy: []
+
+# siehe application-test
+# post-run: []
+
+# tagtype values:
+#    SNAPSHOT = "^v?.*[sS]nap.*$" # contains either *snap* or *Snap* in the name
+#    PRERELEASE = "^v?\d*\.\d*\.\d*[+-].*$" # x.y.z followed by - or +
+#    RELEASE = "^v?\d*\.\d*\.\d*$" # x.y.z
+#    FLOATING = "^.*(stable|latest).*$" # latest, stable, 1-latest, 1.0-latest, 1.0_latest, ...
+#    PULLREQUEST = "PULLREQUEST"  # never matches, defined via Webhook type and PullRequest logic on feature branches
+#    NOTHING = ".*" # Catch all that has not matched before
+
+# branchtype values:
+#     PULLREQUEST = "PULLREQUEST"  # never matches, defined via Webhook type and PullRequest logic on feature branches
+#     TAG = "^refs\/tags.*$" # No branch but tag instead is set
+#     FEATURE_BRANCH = "^refs\/heads\/feat.*" # refs/heads/feat/initial_creation or refs/heads/feature/initial_creation or refs/heads/feature_initial_creation or refs/heads/feat_initial_creation ...
+#     MAIN_BRANCH = "^refs\/heads\/main$" # exactly /refs/heads/main
+#     DEV_BRANCH = "^refs\/heads\/dev.*$" # refs/heads/dev or refs/heads/dev2 or refs/heads/dev_something or refs/heads/dev/mydev1 or refs/heads/dev/mydev2 ...
+#     HOTFIX_BRANCH = "^refs\/heads\/(hot)?fix.*$" # refs/heads/fix_initial_creation or refs/heads/fix/initial_creation or refs/heads/hotfix/feature_initial_creation or refs/heads/hotfix/feature_initial_creation
+#     OTHER = "^refs\/heads\/.*$" # Branch, but none of the above
+
+# build-control actions:
+#    - build = Kompiliere und baue die Sourcen, in Java der Maven verify
+#    - test = Schalte Unit Tests ein
+#    - lint = Schalte Code Linting ein
+#    - sonarscan = Sonarscan einschalten
+#    - pkgscan = Erzeugen von SBOM und Vulnerability Scan des Source Codes
+#    - imagescan = Erzeugen von SBOM und Vulnerability Scan des Container Images
+#    - qualitygate = Durchlaufen des benannten Quality Gates. Siehe zusätzlich Quality Gate Parameter unten. Derzeit TEST.
+#    - build_image_test = Container Image bauen, aber nicht nach Artifactory / ZAR laden
+#    - build_image_push = Container Image bauen und nach Artifactory / ZAR laden
+#    - DEPRECATED: push = Wie build_image_push
+#    - deploy = Auto-Deploy des Images in das konfigurierte gitops (release/Helm chart) Repository, branch and path wie in den deployment-targets definiert. Siehe oben auch deployment-targets Sektion. Siehe auch deploytarget unten
+#    - pre_deploy = Triggere eine pre-deploy Pipeline, siehe pre-deploy Liste oben
+#    - post_deploy = Triggere eine post-deploy Pipeline, siehe post-deploy Liste oben
+#    - application_test = Triggere eine application-test Pipeline, siehe application-test Liste oben
+#    - post_run = Triggere eine post-run Pipeline, siehe post-run Liste oben
+#    - npm_publish = Publiziere eine npm Library ins Artifactory
+#
+# Weitere Steueroptionen:
+# DEPRECATED: image-exists-skip-build: True/False (Default: True) - Stattdessen force_build verwenden. (Achtung: Logik wird bei force_build umgedreht.) - True: Wenn das Image existiert, nicht neu bauen, sondern Image retaggen. False: Immer neu bauen
+# force_build: True/False (Default: False) - True: Auch wenn das Image existiert, wird trotzdem neu gebaut. False: Wenn das Image existiert, nicht neu bauen. (ersetzt negiert: image-exists-skip-build)
+# DEPRECATED: ignore_quality_gate: True/False (Default: True) - Stattdessen sonarqube.fail_pipeline verwenden. (Achtung: Logik wird bei sonarqube.fail_pipeline umgedreht.) - True: Das im Sonarqube definierte Quality-Gate bricht nicht die Pipeline. False: Die Pipeline schlägt fehl.
+# sonarqube:
+#   fail_pipeline: True/False (Default: False) - True: Das im Sonarqube definierte Quality-Gate bricht die Pipeline. False: Die Pipeline läuft trotz fehlgeschlagenem Quality Gate weiter. (ersetzt negiert: ignore_quality_gate)
+# deploytarget: MY-DEV1-SPECIAL (Default: Keiner) - Welches Deployment Ziel beim Auto Deployment angesteuert werden soll, aus der Liste der deployment-targets oben
+# argocd_wait_on_sync: True/False (Default: True) - True: Wartet beim ArgoCD Sync, bis der Sync erfolgt ist. False: Pipeline startet den Sync, wartet aber nicht auf den Sync
+# qualitygate: TEST - Default: TEST - Kurzform für die Definition, welches Quality Gate durchlaufen werden soll, mit default Steuerung. Wird dieser Parameter ganz weggelassen für Abwärtskompatibilität, wird TEST angenommen
+# # alternativ
+# qualitygate:
+#   name: TEST - Default: TEST - Name des Quality Gates, gegen welches getestet werden soll (derzeit hardcoded TEST). Default: TEST
+#   dry_run: False - True/False (Default: False) - Dry_run durchläuft das Quality Gate, ohne das Image zu signieren, die Anzeige im RISe zeigt dies an
+#   fail_pipeline: False - True/False (Default: False) - Hält die Pipeline mit Fehler an, wenn das Quality Gate nicht erfolgreich durchlaufen wurde
+
+# gitops_auto_squash: True/False (Default: False) - Macht mit cherry-picks beim Auto-Deploy ein rebase -i und squashed alle AUTO: Commits bis zum letzten Release Tag (v1.2.3) in der Historie auf einen einzelnen neuen AUTO Commit. Kann auch selektiv in der build-control für einzelne Einträge gesetzt werden.
+# feature_build_to_pull_request: True/False (Default: True) - Wandelt einen Feature Branch Build zu einem Pull Request um, sofern dieser nicht auf Entwurf (Draft) steht
+
+build-control:
+  # Entwickler Umgebungen
+  # dev1-shared (feature & hotfix Branch)
+  - name: dev1-shared1
+    branchtype: FEATURE_BRANCH
+    filter: "^refs\\/heads\\/.*-shared1$"
+    actions: &dev1-shared-actions
+      - build
+      - sonarscan
+      - test
+      - pkgscan
+      - imagescan
+      - imagesign
+      - build_image_push
+      - push
+      - deploy
+    deploytarget: DEV1_SHARED1
+  - { name: dev1-shared2, branchtype: FEATURE_BRANCH, filter: "^refs\\/heads\\/.*-shared2$", actions: *dev1-shared-actions, deploytarget: DEV1_SHARED2 }
+  - { name: dev1-shared3, branchtype: FEATURE_BRANCH, filter: "^refs\\/heads\\/.*-shared3$", actions: *dev1-shared-actions, deploytarget: DEV1_SHARED3 }
+  - { name: dev1-shared4, branchtype: FEATURE_BRANCH, filter: "^refs\\/heads\\/.*-shared4$", actions: *dev1-shared-actions, deploytarget: DEV1_SHARED4 }
+  - { name: dev1-shared5, branchtype: FEATURE_BRANCH, filter: "^refs\\/heads\\/.*-shared5$", actions: *dev1-shared-actions, deploytarget: DEV1_SHARED5 }
+  - { name: dev1-demo, branchtype: FEATURE_BRANCH, filter: "^refs\\/heads\\/.*-demo$", actions: *dev1-shared-actions, deploytarget: DEV1_DEMO }
+  - { name: dev1-e2e, branchtype: FEATURE_BRANCH, filter: "^refs\\/heads\\/.*-e2e$", actions: *dev1-shared-actions, deploytarget: DEV1_E2E }
+  - { name: dev1-devops, branchtype: FEATURE_BRANCH, filter: "^refs\\/heads\\/.*-devops$", actions: *dev1-shared-actions, deploytarget: DEV1_DEVOPS }
+
+  - { name: dev1-shared1, branchtype: HOTFIX_BRANCH, filter: "^refs\\/heads\\/.*-shared1$", actions: *dev1-shared-actions, deploytarget: DEV1_SHARED1, sonarqube: { fail_pipeline: True } }
+  - { name: dev1-shared2, branchtype: HOTFIX_BRANCH, filter: "^refs\\/heads\\/.*-shared2$", actions: *dev1-shared-actions, deploytarget: DEV1_SHARED2, sonarqube: { fail_pipeline: True } }
+  - { name: dev1-shared3, branchtype: HOTFIX_BRANCH, filter: "^refs\\/heads\\/.*-shared3$", actions: *dev1-shared-actions, deploytarget: DEV1_SHARED3, sonarqube: { fail_pipeline: True } }
+  - { name: dev1-shared4, branchtype: HOTFIX_BRANCH, filter: "^refs\\/heads\\/.*-shared4$", actions: *dev1-shared-actions, deploytarget: DEV1_SHARED4, sonarqube: { fail_pipeline: True } }
+  - { name: dev1-shared5, branchtype: HOTFIX_BRANCH, filter: "^refs\\/heads\\/.*-shared5$", actions: *dev1-shared-actions, deploytarget: DEV1_SHARED5, sonarqube: { fail_pipeline: True } }
+  - { name: dev1-demo, branchtype: HOTFIX_BRANCH, filter: "^refs\\/heads\\/.*-demo$", actions: *dev1-shared-actions, deploytarget: DEV1_DEMO, sonarqube: { fail_pipeline: True } }
+  - { name: dev1-e2e, branchtype: HOTFIX_BRANCH, filter: "^refs\\/heads\\/.*-e2e$", actions: *dev1-shared-actions, deploytarget: DEV1_E2E, sonarqube: { fail_pipeline: True } }
+  - { name: dev1-devops, branchtype: HOTFIX_BRANCH, filter: "^refs\\/heads\\/.*-devops$", actions: *dev1-shared-actions, deploytarget: DEV1_DEVOPS, sonarqube: { fail_pipeline: True } }
+
+
+  # dev1-dev
+  - name: dev1-dev
+    branchtype: DEV_BRANCH
+    sonarqube:
+      fail_pipeline: True
+    actions:
+      - build
+      - build_image_push
+      - lint
+      - sonarscan
+      - test
+      - imagescan
+      - imagesign
+      - pkgscan
+      - deploy
+    deploytarget: DEV1_DEV
+
+  # Feature/Hotfix Branches
+  - name: feature-branch
+    branchtype: FEATURE_BRANCH
+    sonarqube:
+      fail_pipeline: True
+    filter: "^refs\\/heads\\/feature\\/EVORVF[1|2]-.*$"
+    actions: &build-actions
+      - build
+      - build_image_test
+      - lint
+      - sonarscan
+      - test
+      - pkgscan
+  - name: hotfix-branch
+    branchtype: HOTFIX_BRANCH
+    sonarqube:
+      fail_pipeline: True
+    actions: *build-actions
+  # Pull Requests
+  - name: pull-requests
+    tagtype: PULLREQUEST
+    force_build: True
+    sonarqube:
+      fail_pipeline: True
+    actions:
+      - build
+      - build_image_test
+      - lint
+      - sonarscan
+      - test
+      - pkgscan
+  # Renovate Branches
+  - name: renovate_update_branch
+    branchtype: OTHER
+    filter: "^refs\\/heads\\/renovate\\/.*$"
+    actions: *build-actions
+
+  # ARTI
+  - name: *snapshot-branch
+    tagtype: SNAPSHOT
+    actions:
+      - build
+      - sonarscan
+      - test
+      - pkgscan
+      - imagescan
+      - imagesign
+      - build_image_push
+      - push
+      - deploy
+    sonarqube:
+      fail_pipeline: True
+    deploytarget: SNAPSHOT
+  - name: *prerelease-branch
+    tagtype: PRERELEASE
+    actions:
+      - imagescan
+      - imagesign
+      - build_image_push
+      - deploy
+    deploytarget: PRERELEASE
+  - name: *release-branch
+    tagtype: RELEASE
+    actions:
+      - imagescan
+      - imagesign
+      - build_image_push
+      - deploy
+    deploytarget: RELEASE
